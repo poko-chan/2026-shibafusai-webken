@@ -1,1 +1,293 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>芝生祭 電技研 - CSSで変わるポップアップ体験</title>
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --card-bg: #ffffff;
+      --text: #1f2937;
+      --accent: #2563eb;
+    }
 
+    body {
+      margin: 0;
+      padding: 40px 20px;
+      font-family: sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+      transition: background 0.3s;
+    }
+
+    h1 { margin-bottom: 8px; }
+    p.desc { margin-top: 0; color: #6b7280; margin-bottom: 28px; }
+
+    /* スタイル切り替えバー */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .style-btn {
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: bold;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: #fff;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .style-btn:hover { background: #e5e7eb; }
+    .style-btn.active {
+      background: #1f2937;
+      color: #fff;
+      border-color: #1f2937;
+    }
+
+    /* ポップアップ起動ボタン */
+    .trigger-btn {
+      padding: 16px 36px;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 9999px;
+      border: none;
+      background: #2563eb;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(37,99,235,0.4);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .trigger-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(37,99,235,0.5);
+    }
+
+    /* ===================================================
+       共通オーバーレイ構造
+    =================================================== */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      visibility: hidden;
+      opacity: 0;
+      z-index: 100;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+    .overlay.open {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .modal-box {
+      width: 90%;
+      max-width: 440px;
+      position: relative;
+    }
+
+    /* ===================================================
+       スタイルバリエーション（CSSの切り替え）
+    =================================================== */
+
+    /* 1. デフォルト：モダン・クリーン */
+    body[data-theme="modern"] .overlay {
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(4px);
+    }
+    body[data-theme="modern"] .modal-box {
+      background: #ffffff;
+      padding: 32px;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15);
+      transform: scale(0.9);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    body[data-theme="modern"] .overlay.open .modal-box {
+      transform: scale(1);
+    }
+    body[data-theme="modern"] .modal-title { font-size: 20px; font-weight: 700; margin-top: 0; }
+    body[data-theme="modern"] .action-btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background: #2563eb;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* 2. ネオブュータリズム（太枠＋硬いポップ影） */
+    body[data-theme="neobrutalism"] .overlay {
+      background: rgba(0, 0, 0, 0.6);
+    }
+    body[data-theme="neobrutalism"] .modal-box {
+      background: #fde047;
+      padding: 28px;
+      border: 4px solid #000;
+      border-radius: 0px;
+      box-shadow: 10px 10px 0px #000;
+      transform: translateY(40px);
+      transition: transform 0.2s cubic-bezier(0, 0, 0.2, 1);
+    }
+    body[data-theme="neobrutalism"] .overlay.open .modal-box {
+      transform: translateY(0);
+    }
+    body[data-theme="neobrutalism"] .modal-title { font-size: 22px; font-weight: 900; text-transform: uppercase; margin-top: 0; }
+    body[data-theme="neobrutalism"] .action-btn {
+      width: 100%;
+      padding: 12px;
+      border: 3px solid #000;
+      background: #ff5757;
+      color: #000;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 4px 4px 0px #000;
+    }
+    body[data-theme="neobrutalism"] .action-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0px #000;
+    }
+
+    /* 3. サイバーパンク・HUD */
+    body[data-theme="cyberpunk"] {
+      --bg: #090a10;
+      --text: #00f0ff;
+    }
+    body[data-theme="cyberpunk"] .overlay {
+      background: rgba(4, 7, 20, 0.85);
+    }
+    body[data-theme="cyberpunk"] .modal-box {
+      background: rgba(10, 16, 30, 0.95);
+      border: 1px solid #00f0ff;
+      border-left: 6px solid #ff0055;
+      padding: 30px;
+      color: #00f0ff;
+      clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.3), inset 0 0 15px rgba(0, 240, 255, 0.1);
+      transform: rotateX(70deg);
+      transition: transform 0.35s ease;
+    }
+    body[data-theme="cyberpunk"] .overlay.open .modal-box {
+      transform: rotateX(0deg);
+    }
+    body[data-theme="cyberpunk"] .modal-title {
+      font-family: monospace;
+      letter-spacing: 2px;
+      color: #ff0055;
+      text-shadow: 0 0 8px rgba(255, 0, 85, 0.8);
+      margin-top: 0;
+    }
+    body[data-theme="cyberpunk"] .action-btn {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #00f0ff;
+      background: transparent;
+      color: #00f0ff;
+      font-family: monospace;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+    }
+    body[data-theme="cyberpunk"] .action-btn:hover {
+      background: #00f0ff;
+      color: #000;
+    }
+
+    /* 4. レトロRPG (8-bit) */
+    body[data-theme="rpg"] {
+      --bg: #222;
+      --text: #fff;
+    }
+    body[data-theme="rpg"] .overlay {
+      background: rgba(0, 0, 0, 0.7);
+    }
+    body[data-theme="rpg"] .modal-box {
+      background: #0000aa;
+      border: 4px double #ffffff;
+      border-radius: 4px;
+      padding: 24px;
+      color: #ffffff;
+      box-shadow: 0 0 0 4px #0000aa;
+      transform: scale(0.1);
+      transition: transform 0.15s steps(3);
+    }
+    body[data-theme="rpg"] .overlay.open .modal-box {
+      transform: scale(1);
+    }
+    body[data-theme="rpg"] .modal-title { font-size: 18px; margin-top: 0; border-bottom: 2px dashed #fff; padding-bottom: 6px; }
+    body[data-theme="rpg"] .action-btn {
+      width: 100%;
+      padding: 10px;
+      background: #000;
+      color: #fff;
+      border: 2px solid #fff;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body data-theme="modern">
+
+  <h1>CSSポップアップ印象チェンジャー</h1>
+  <p class="desc">同じHTMLでも、枠線・影・アニメーションで受け取る感情が激変します。</p>
+
+  <!-- テーマ選択 -->
+  <div class="controls">
+    <button class="style-btn active" onclick="setTheme('modern', this)">① モダン (安心・信頼)</button>
+    <button class="style-btn" onclick="setTheme('neobrutalism', this)">② ネオブュータリズム (警告・主張)</button>
+    <button class="style-btn" onclick="setTheme('cyberpunk', this)">③ サイバーHUD (近未来・警告)</button>
+    <button class="style-btn" onclick="setTheme('rpg', this)">④ レトロRPG (ゲーム感)</button>
+  </div>
+
+  <button class="trigger-btn" onclick="openModal()">ポップアップを開く</button>
+
+  <!-- モーダルウィンドウ本体（構造は常に同一） -->
+  <div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
+    <div class="modal-box" id="modalBox">
+      <h3 class="modal-title">システム通知</h3>
+      <p class="modal-body">
+        これは同一のHTMLタグで構成されたウィンドウです。<br>
+        CSSの影の硬さ、角丸の有無、出現時の変形（scale / translateY / rotateX）によって印象の違いを生み出しています。
+      </p>
+      <button class="action-btn" onclick="closeModal()">確認して閉じる</button>
+    </div>
+  </div>
+
+  <script>
+    function setTheme(theme, btn) {
+      document.body.setAttribute('data-theme', theme);
+      document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function openModal() {
+      document.getElementById('overlay').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('overlay').classList.remove('open');
+    }
+
+    function handleOverlayClick(e) {
+      if (e.target.id === 'overlay') {
+        closeModal();
+      }
+    }
+  </script>
+</body>
+</html>
