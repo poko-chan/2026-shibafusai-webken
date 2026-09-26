@@ -3,30 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>芝生祭 電技研 Web班 | リキッドグラスUI＆インタラクション検証</title>
+  <title>芝生祭 電技研 Web班 | CSSとUIインタラクション展示</title>
   
   <style>
     /* ===================================================
-       生成色（きなりいろ）× リキッドグラス・デザイン
+       生成色（きなりいろ）・リキッドグラスデザイントークン
     =================================================== */
     :root {
-      --kinari-bg: #faf7f0;         /* 温かみのある明るい生成色 */
-      --kinari-sub: #f3ede2;
-      --card-bg: rgba(255, 255, 255, 0.72); /* グラスモーフィズム基底 */
-      --glass-border: rgba(214, 203, 185, 0.45);
-      --glass-highlight: rgba(255, 255, 255, 0.85);
-      --text-main: #2a2723;
-      --text-muted: #756d63;
-      --accent-shiba: #2b7a3a;      /* 芝生祭グリーン */
-      --accent-shiba-glow: rgba(43, 122, 58, 0.28);
+      --kinari-bg: #fbf9f4;        /* 生成色の明るい白 */
+      --kinari-card: #ffffff;      /* カード面 */
+      --kinari-subcard: #f5f0e6;   /* サブ選択肢 */
+      --border-color: #e5dec9;    /* 柔らかい境界線 */
+      --border-dark: #cdbfa6;
+      --text-main: #2b2823;        /* 墨色 */
+      --text-muted: #6e675f;       /* 薄墨色 */
+      --accent-shiba: #2e7d32;     /* 芝生色 */
+      --accent-hover: #1b5e20;
+      --accent-light: #e8f5e9;
+      --accent-alert: #c62828;
       
-      /* スプリングイージング */
-      --spring-smooth: cubic-bezier(0.32, 0.72, 0, 1);
-      --spring-bouncy: cubic-bezier(0.34, 1.56, 0.64, 1);
-      --spring-liquid: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      
-      --font-ui: -apple-system, BlinkMacSystemFont, "BIZ UDPGothic", "Hiragino Kaku Gothic ProN", sans-serif;
-      --font-mono: "SF Mono", Monaco, Consolas, monospace;
+      --font-base: -apple-system, BlinkMacSystemFont, "BIZ UDPGothic", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+      --font-code: "SF Mono", Monaco, Consolas, monospace;
+
+      /* iOS Liquid Glass 物理イージング */
+      --spring-island: cubic-bezier(0.32, 1.25, 0.32, 1.02);
+      --spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     * {
@@ -37,447 +38,1250 @@
 
     body {
       background-color: var(--kinari-bg);
-      background-image: 
-        radial-gradient(at 15% 15%, rgba(230, 240, 225, 0.6) 0px, transparent 50%),
-        radial-gradient(at 85% 85%, rgba(245, 235, 215, 0.6) 0px, transparent 50%);
       color: var(--text-main);
-      font-family: var(--font-ui);
+      font-family: var(--font-base);
+      line-height: 1.6;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
       overflow-x: hidden;
     }
 
-    /* ヘッダー */
+    /* 上部ヘッダー */
     header {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.65);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--glass-border);
+      background-color: #ffffff;
+      border-bottom: 1px solid var(--border-color);
       position: sticky;
       top: 0;
-      z-index: 90;
+      z-index: 40;
+      box-shadow: 0 2px 8px rgba(74, 60, 40, 0.04);
     }
     .header-inner {
-      max-width: 1100px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 10px 20px;
+      padding: 12px 20px;
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .brand-title {
+      display: flex;
       align-items: center;
       gap: 12px;
     }
-    .badge {
+    .brand-badge {
       background: var(--accent-shiba);
-      color: #fff;
-      font-size: 11px;
+      color: #ffffff;
+      font-size: 13px;
       font-weight: 700;
-      padding: 3px 8px;
+      padding: 4px 10px;
       border-radius: 6px;
+      letter-spacing: 0.05em;
     }
-    .header-title {
-      font-size: 15px;
+    .title-group h1 {
+      font-size: 17px;
       font-weight: 700;
       color: var(--text-main);
+      line-height: 1.2;
     }
-
-    /* ===================================================
-       Dynamic Island（リキッド・グラス仕様）
-    =================================================== */
-    .island-wrapper {
-      position: sticky;
-      top: 64px;
-      z-index: 100;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin: 16px 0 28px 0;
-      perspective: 1200px;
-    }
-
-    .island-container {
-      background: rgba(22, 22, 24, 0.88);
-      backdrop-filter: blur(25px) saturate(180%);
-      -webkit-backdrop-filter: blur(25px) saturate(180%);
-      color: #ffffff;
-      border-radius: 28px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 
-        0 12px 36px rgba(0, 0, 0, 0.25),
-        0 1px 0 rgba(255, 255, 255, 0.3) inset;
-      cursor: pointer;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 16px;
-      
-      /* リキッド特有のバネ変形トランジション */
-      width: 210px;
-      height: 42px;
-      transition: 
-        width 0.48s var(--spring-liquid),
-        height 0.48s var(--spring-liquid),
-        border-radius 0.45s ease,
-        transform 0.2s ease,
-        box-shadow 0.3s ease;
-      user-select: none;
-    }
-
-    .island-container:hover {
-      transform: scale(1.02);
-      box-shadow: 0 16px 44px rgba(0, 0, 0, 0.32);
-    }
-    .island-container:active {
-      transform: scale(0.96);
-    }
-
-    /* 展開状態 (Expanded Liquid Glass) */
-    .island-container.expanded {
-      width: 360px;
-      height: 155px;
-      border-radius: 36px;
-      padding: 20px;
-      align-items: stretch;
-      cursor: default;
-    }
-
-    /* アイランド内の各コンテンツレイアウト */
-    .island-compact {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 13px;
-      font-weight: 600;
-      transition: opacity 0.2s ease;
-    }
-    .island-expanded-view {
-      display: none;
-      width: 100%;
-      flex-direction: column;
-      justify-content: space-between;
-      opacity: 0;
-      transition: opacity 0.3s 0.15s ease;
-    }
-
-    .island-container.expanded .island-compact {
-      display: none;
-      opacity: 0;
-    }
-    .island-container.expanded .island-expanded-view {
-      display: flex;
-      opacity: 1;
-    }
-
-    /* 音楽の波形バー */
-    .wave-box {
-      display: flex;
-      align-items: flex-end;
-      gap: 2.5px;
-      height: 14px;
-    }
-    .wave-bar {
-      width: 3px;
-      background: #22c55e;
-      border-radius: 2px;
-      animation: wavePulse 1s ease-in-out infinite alternate;
-    }
-    .wave-bar:nth-child(1) { height: 6px; animation-delay: 0.1s; }
-    .wave-bar:nth-child(2) { height: 14px; animation-delay: 0.3s; }
-    .wave-bar:nth-child(3) { height: 9px; animation-delay: 0.2s; }
-    .wave-bar:nth-child(4) { height: 12px; animation-delay: 0.4s; }
-
-    @keyframes wavePulse {
-      0% { height: 4px; }
-      100% { height: 14px; }
-    }
-
-    /* Uber進行バー */
-    .progress-track {
-      width: 100%;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 99px;
-      overflow: hidden;
-      margin-top: 10px;
-    }
-    .progress-fill {
-      height: 100%;
-      width: 72%;
-      background: #22c55e;
-      border-radius: 99px;
-      animation: shimmer 2s infinite linear;
-    }
-
-    /* アイランド切り替えコントローラ */
-    .island-selector {
-      display: flex;
-      gap: 6px;
-      margin-top: 10px;
-      background: rgba(0, 0, 0, 0.05);
-      padding: 4px;
-      border-radius: 99px;
-      border: 1px solid var(--glass-border);
-    }
-    .island-btn {
-      padding: 5px 12px;
+    .title-group p {
       font-size: 11px;
-      font-weight: 700;
-      border: none;
-      background: transparent;
       color: var(--text-muted);
-      border-radius: 99px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .island-btn.active {
-      background: #ffffff;
-      color: var(--text-main);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
 
-    /* メインコンテナ */
-    main {
-      max-width: 1080px;
-      width: 100%;
-      padding: 0 20px 40px;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
-    /* グラスカードコンテナ */
-    .glass-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--glass-border);
-      border-radius: 20px;
-      padding: 24px;
-      box-shadow: 0 8px 30px rgba(60, 48, 30, 0.04);
-      position: relative;
-    }
-
-    .grid-layout {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 20px;
-    }
-    @media (min-width: 860px) {
-      .grid-layout {
-        grid-template-columns: 380px 1fr;
-      }
-    }
-
-    /* モーダル（リキッド・ガラス・ポップアップ） */
-    .liquid-modal-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 150;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(40, 36, 30, 0.35);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      visibility: hidden;
-      opacity: 0;
-      transition: opacity 0.3s ease, visibility 0.3s;
-    }
-    .liquid-modal-overlay.open {
-      visibility: visible;
-      opacity: 1;
-    }
-    .liquid-modal-box {
-      width: 90%;
-      max-width: 440px;
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(28px) saturate(190%);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      border-radius: 28px;
-      padding: 28px;
-      box-shadow: 
-        0 24px 60px rgba(0, 0, 0, 0.15),
-        0 1px 0 rgba(255, 255, 255, 0.9) inset;
-      transform: scale(0.7) translateY(40px);
-      opacity: 0;
-      transition: transform 0.4s var(--spring-bouncy), opacity 0.25s ease;
-    }
-    .liquid-modal-overlay.open .liquid-modal-box {
-      transform: scale(1) translateY(0);
-      opacity: 1;
-    }
-
-    /* 操作ボタン */
-    .glass-btn {
-      padding: 12px 24px;
-      font-size: 14px;
-      font-weight: 700;
-      border-radius: 12px;
-      border: 1px solid var(--glass-border);
-      background: #ffffff;
-      color: var(--text-main);
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-      transition: all 0.25s var(--spring-bouncy);
-      position: relative;
-    }
-    .glass-btn:hover {
-      transform: translateY(-2px) scale(1.02);
-      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-    }
-    .glass-btn:active {
-      transform: translateY(1px) scale(0.97);
-    }
-
-    .glass-btn-primary {
-      background: var(--accent-shiba);
-      border-color: var(--accent-shiba);
-      color: #ffffff;
-      box-shadow: 0 4px 14px var(--accent-shiba-glow);
-    }
-
-    /* コードプレビュー */
-    .code-display {
-      background: #1e1e20;
-      color: #ede7dc;
-      padding: 14px;
-      border-radius: 12px;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      line-height: 1.5;
-      overflow-x: auto;
-      margin-top: 14px;
-    }
-
-    /* リキッド・ドロップ通知 */
-    .liquid-toast {
-      position: fixed;
-      top: -70px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(18px);
-      border: 1px solid rgba(255, 255, 255, 0.7);
-      padding: 10px 22px;
-      border-radius: 99px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-main);
+    /* 交代サイクル用タイマー */
+    .timer-badge {
       display: flex;
       align-items: center;
       gap: 8px;
-      z-index: 120;
-      transition: top 0.45s var(--spring-bouncy), transform 0.45s var(--spring-bouncy);
+      background: var(--kinari-subcard);
+      border: 1px solid var(--border-color);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
     }
-    .liquid-toast.show {
-      top: 18px;
+    .timer-display {
+      font-family: var(--font-code);
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text-main);
+    }
+    .timer-btn {
+      background: #ffffff;
+      border: 1px solid var(--border-dark);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    /* ===================================================
+       🌟 リキッドグラス・ダイナミックアイランド (最重要演出)
+    =================================================== */
+    .island-screen-bar {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .dynamic-island {
+      pointer-events: auto;
+      background: rgba(10, 10, 10, 0.95);
+      color: #ffffff;
+      backdrop-filter: blur(25px) saturate(180%);
+      -webkit-backdrop-filter: blur(25px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 
+        0 12px 32px rgba(0, 0, 0, 0.35),
+        0 2px 6px rgba(0, 0, 0, 0.2),
+        inset 0 1px 1px rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      user-select: none;
+      transform-origin: center top;
+      transition: 
+        width 0.45s var(--spring-island),
+        height 0.45s var(--spring-island),
+        border-radius 0.45s var(--spring-island),
+        box-shadow 0.3s ease;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* アイランドの押し込み・プニプニ感（Squish） */
+    .dynamic-island:active {
+      transform: scale(0.97);
+    }
+
+    /* 状態A: コンパクト (通常カプセル) */
+    .dynamic-island.state-compact {
+      width: 190px;
+      height: 38px;
+      border-radius: 20px;
+      padding: 0 14px;
+    }
+
+    /* 状態B: 展開 (Expanded Liquid Glass) */
+    .dynamic-island.state-expanded {
+      width: 360px;
+      height: 165px;
+      border-radius: 36px;
+      padding: 16px 20px;
+      box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.15),
+        inset 0 1px 2px rgba(255, 255, 255, 0.4);
+    }
+
+    /* 状態C: 通知ドロップ (Alert Drop) */
+    .dynamic-island.state-toast {
+      width: 330px;
+      height: 74px;
+      border-radius: 24px;
+      padding: 12px 18px;
+    }
+
+    /* 内部ビューのフェード切り替え */
+    .island-view {
+      display: none;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 0.25s ease 0.1s;
+    }
+    .island-view.active-view {
+      display: flex;
+      opacity: 1;
+    }
+
+    /* --- [ビュー1: 音楽 (Music)] --- */
+    .compact-music {
+      align-items: center;
+      justify-content: space-between;
+      height: 100%;
+      width: 100%;
+    }
+    .compact-music .album-art {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #10b981, #047857);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+    }
+    /* リアルタイム音波イコライザー（CSS Keyframes） */
+    .equalizer {
+      display: flex;
+      align-items: center;
+      gap: 2.5px;
+      height: 14px;
+    }
+    .eq-bar {
+      width: 3px;
+      background: #22c55e;
+      border-radius: 2px;
+      animation: eqBounce 1s ease-in-out infinite alternate;
+    }
+    .eq-bar:nth-child(1) { height: 6px; animation-delay: 0.1s; }
+    .eq-bar:nth-child(2) { height: 14px; animation-delay: 0.3s; }
+    .eq-bar:nth-child(3) { height: 9px; animation-delay: 0.2s; }
+    .eq-bar:nth-child(4) { height: 12px; animation-delay: 0.4s; }
+    @keyframes eqBounce {
+      0% { height: 4px; }
+      100% { height: 16px; }
+    }
+
+    .expanded-music {
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+    }
+    .expanded-music-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .big-art {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #22c55e, #15803d);
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    .track-info h4 { font-size: 14px; font-weight: 700; color: #fff; }
+    .track-info p { font-size: 11px; color: #a1a1aa; }
+
+    /* プログレスバー */
+    .track-bar-wrap {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 2px;
+      position: relative;
+      margin: 8px 0 4px;
+    }
+    .track-progress {
+      height: 100%;
+      width: 48%;
+      background: #ffffff;
+      border-radius: 2px;
+      animation: trackPlay 15s linear infinite;
+    }
+    @keyframes trackPlay {
+      0% { width: 10%; }
+      100% { width: 90%; }
+    }
+    .time-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: #71717a;
+      font-family: var(--font-code);
+    }
+    .music-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 24px;
+      font-size: 16px;
+      margin-top: 4px;
+    }
+
+    /* --- [ビュー2: ナビ・マップ (Maps)] --- */
+    .compact-map {
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      height: 100%;
+    }
+    .nav-arrow-icon {
+      color: #38bdf8;
+      font-size: 15px;
+      font-weight: 900;
+      transition: transform 0.3s var(--spring-bounce);
+    }
+    .compact-map-text {
+      font-size: 11px;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+
+    .expanded-map {
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+    }
+    .map-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .map-turn-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .big-nav-icon {
+      width: 42px;
+      height: 42px;
+      background: #0284c7;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: #fff;
+    }
+    .map-eta {
+      text-align: right;
+    }
+    .map-eta-time {
+      font-size: 16px;
+      font-weight: 800;
+      color: #22c55e;
+      font-family: var(--font-code);
+    }
+    .map-eta-dist {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+    .mini-route-preview {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #e2e8f0;
+      margin-top: 8px;
+    }
+
+    /* --- [ビュー3: Uber / 配達 (Delivery)] --- */
+    .compact-uber {
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      height: 100%;
+    }
+    .uber-icon {
+      font-size: 13px;
+    }
+    .compact-uber-eta {
+      font-size: 11px;
+      font-weight: 700;
+      color: #fbbf24;
+      font-family: var(--font-code);
+    }
+
+    .expanded-uber {
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+    }
+    .delivery-step-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      margin: 12px 6px;
+    }
+    .delivery-step-line {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      height: 3px;
+      background: rgba(255,255,255,0.2);
+      z-index: 1;
+    }
+    .delivery-step-line-fill {
+      height: 100%;
+      width: 65%;
+      background: #fbbf24;
+      transition: width 0.6s ease;
+    }
+    .delivery-node {
+      position: relative;
+      z-index: 2;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #18181b;
+      border: 2px solid #52525b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+    }
+    .delivery-node.active-node {
+      background: #fbbf24;
+      border-color: #fbbf24;
+      color: #000;
+      font-weight: bold;
+    }
+
+    /* --- [ビュー4: 通知トースト (Toast/Alert)] --- */
+    .island-toast-view {
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      height: 100%;
+    }
+    .toast-bell {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #2563eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .toast-body h5 { font-size: 13px; font-weight: 700; color: #fff; }
+    .toast-body p { font-size: 11px; color: #cbd5e1; }
+
+
+    /* ===================================================
+       メインレイアウト & タブ
+    =================================================== */
+    main {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 30px 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 4px;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      border-radius: 6px 6px 0 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: color 0.15s, background 0.15s;
+    }
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(0,0,0,0.02);
+    }
+    .tab-btn.active {
+      color: var(--accent-shiba);
+      background: #ffffff;
+      border-top: 3px solid var(--accent-shiba);
+      border-left: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      margin-bottom: -6px;
+      padding-bottom: 12px;
+    }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+    @media (min-width: 900px) {
+      .section-grid {
+        grid-template-columns: 420px 1fr;
+      }
+    }
+
+    .card {
+      background: var(--kinari-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(60, 48, 30, 0.03);
+    }
+
+    .panel-heading { margin-bottom: 16px; }
+    .panel-tag {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-shiba);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .panel-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-top: 2px;
+    }
+    .panel-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .preset-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .preset-item {
+      text-align: left;
+      background: var(--kinari-subcard);
+      border: 1px solid var(--border-color);
+      padding: 12px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.15s, background-color 0.15s;
+    }
+    .preset-item:hover {
+      background: #ffffff;
+      border-color: var(--border-dark);
+    }
+    .preset-item.active {
+      background: #ffffff;
+      border-color: var(--accent-shiba);
+      box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.15);
+    }
+    .preset-item .label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2px;
+    }
+    .preset-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .preset-item.active .preset-name { color: var(--accent-shiba); }
+    .preset-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #e0ded8;
+      color: #4a453f;
+    }
+    .preset-css {
+      font-family: var(--font-code);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* ステージ側カード */
+    .stage-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 480px;
+      position: relative;
+      background: #ffffff;
+      border: 1px dashed var(--border-dark);
+    }
+    .stage-status {
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+
+    .trigger-action-btn {
+      padding: 16px 36px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      background-color: var(--accent-shiba);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
+    }
+
+    .code-box {
+      width: 100%;
+      background: #232220;
+      color: #f7f3eb;
+      border-radius: 8px;
+      padding: 14px;
+      font-family: var(--font-code);
+      font-size: 11px;
+      margin-top: 14px;
+      overflow-x: auto;
+      line-height: 1.5;
+    }
+    .code-box-header {
+      font-size: 10px;
+      color: #9c9589;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .commentary-box {
+      width: 100%;
+      background: var(--kinari-subcard);
+      border-left: 4px solid var(--accent-shiba);
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      font-size: 12px;
+      color: var(--text-main);
+      margin-top: 16px;
+    }
+    .commentary-box strong { color: var(--accent-shiba); }
+
+    /* ===================================================
+       モーダルポップアップの既存演出群
+    =================================================== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(30, 26, 20, 0.5);
+      visibility: hidden;
+      opacity: 0;
+    }
+    .modal-overlay.open {
+      visibility: visible;
+      opacity: 1;
+    }
+    .modal-container {
+      width: 90%;
+      max-width: 460px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 20px 40px rgba(40, 32, 20, 0.2);
+      padding: 28px;
+      position: relative;
+    }
+    .modal-container h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 10px;
+    }
+    .modal-container p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .btn-secondary {
+      padding: 8px 16px;
+      font-size: 13px;
+      border: 1px solid var(--border-dark);
+      background: #ffffff;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--text-main);
+    }
+    .btn-primary {
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      border: none;
+      background: var(--accent-shiba);
+      color: #ffffff;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .mode-instant.modal-overlay { transition: none !important; }
+    .mode-instant .modal-container { transition: none !important; }
+
+    .mode-refined.modal-overlay {
+      transition: opacity 0.25s ease-out;
+      backdrop-filter: blur(3px);
+    }
+    .mode-refined .modal-container {
+      transform: scale(0.92) translateY(12px);
+      transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.32s ease-out;
+    }
+    .mode-refined.open .modal-container {
+      transform: scale(1) translateY(0);
+    }
+
+    .mode-bottomsheet.modal-overlay {
+      align-items: flex-end;
+      transition: opacity 0.25s ease;
+    }
+    .mode-bottomsheet .modal-container {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 16px 16px 0 0;
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .mode-bottomsheet.open .modal-container {
+      transform: translateY(0);
+    }
+
+    .mode-shake.modal-overlay {
+      background: rgba(180, 40, 40, 0.3);
+      transition: opacity 0.15s ease;
+    }
+    .mode-shake .modal-container {
+      border: 2px solid var(--accent-alert);
+    }
+    .mode-shake.open .modal-container {
+      animation: modalShake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+    @keyframes modalShake {
+      10%, 90% { transform: translate3d(-2px, 0, 0); }
+      20%, 80% { transform: translate3d(4px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+      40%, 60% { transform: translate3d(6px, 0, 0); }
+    }
+
+    .mode-flip.modal-overlay {
+      perspective: 1000px;
+      transition: opacity 0.3s ease;
+    }
+    .mode-flip .modal-container {
+      transform: rotateX(-30deg) translateY(-20px);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .mode-flip.open .modal-container {
+      transform: rotateX(0deg) translateY(0);
+    }
+
+    /* スライダー調整 */
+    .slider-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+    .slider-row input[type="range"] {
+      width: 180px;
+      accent-color: var(--accent-shiba);
+    }
+
+    footer {
+      border-top: 1px solid var(--border-color);
+      background: #ffffff;
+      padding: 16px 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
     }
   </style>
 </head>
 <body>
 
-  <!-- 上部ヘッダー -->
+  <!-- ==============================================
+       画面上部：本物のリキッドグラス・ダイナミックアイランド
+  =============================================== -->
+  <div class="island-screen-bar">
+    <div class="dynamic-island state-compact" id="dynamicIsland" onclick="toggleIslandExpansion()">
+      
+      <!-- 1. ミュージック表示 -->
+      <div class="island-view active-view" id="view-music">
+        <!-- コンパクト時 -->
+        <div class="compact-music flex-view" id="music-compact">
+          <div class="album-art">🎵</div>
+          <div style="font-size:11px; font-weight:700; color:#e4e4e7; margin:0 6px;">芝生祭 Official BGM</div>
+          <div class="equalizer">
+            <span class="eq-bar"></span>
+            <span class="eq-bar"></span>
+            <span class="eq-bar"></span>
+            <span class="eq-bar"></span>
+          </div>
+        </div>
+        <!-- 展開時 (リキッドグラス大窓) -->
+        <div class="expanded-music flex-view" id="music-expanded" style="display:none; width:100%;">
+          <div class="expanded-music-top">
+            <div class="big-art">🎧</div>
+            <div class="track-info">
+              <h4>春雷 - Web研 Remix</h4>
+              <p>芝生祭 電技研サウンドトラック</p>
+            </div>
+          </div>
+          <div>
+            <div class="track-bar-wrap">
+              <div class="track-progress"></div>
+            </div>
+            <div class="time-labels">
+              <span>1:24</span>
+              <span>-2:06</span>
+            </div>
+          </div>
+          <div class="music-controls">
+            <span>⏮</span>
+            <span style="font-size:22px;">⏸</span>
+            <span>⏭</span>
+            <span style="font-size:14px; color:#22c55e;">AirPlay 🌿</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. ナビ・マップ表示 -->
+      <div class="island-view" id="view-maps">
+        <div class="compact-map flex-view" id="maps-compact">
+          <span class="nav-arrow-icon" id="compactNavIcon">↗</span>
+          <span class="compact-map-text" id="compactNavText">200m先 電技研教室を右折</span>
+          <span style="font-size:11px; color:#38bdf8; font-family:var(--font-code);">3分</span>
+        </div>
+        <div class="expanded-map flex-view" id="maps-expanded" style="display:none; width:100%;">
+          <div class="map-header">
+            <div class="map-turn-badge">
+              <div class="big-nav-icon" id="expandedNavIcon">↗</div>
+              <div>
+                <div style="font-size:15px; font-weight:800; color:#fff;" id="expandedNavDist">200m先</div>
+                <div style="font-size:12px; color:#94a3b8;" id="expandedNavRoad">高校棟 2F 電子技術研究部</div>
+              </div>
+            </div>
+            <div class="map-eta">
+              <div class="map-eta-time" id="expandedNavEta">15:42</div>
+              <div class="map-eta-dist">残り 0.4 km</div>
+            </div>
+          </div>
+          <div class="mini-route-preview">
+            <span id="navStepDetail">次の指示: 正面階段を上がって右手の展示室へ</span>
+            <span style="color:#22c55e; font-weight:bold;">順調</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Uber・デリバリー表示 -->
+      <div class="island-view" id="view-delivery">
+        <div class="compact-uber flex-view" id="uber-compact">
+          <span class="uber-icon">🛵</span>
+          <span style="font-size:11px; font-weight:700; color:#f4f4f5;">芝生祭 出前館</span>
+          <span class="compact-uber-eta" id="compactUberEta">あと8分</span>
+        </div>
+        <div class="expanded-uber flex-view" id="uber-expanded" style="display:none; width:100%;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:14px; font-weight:800; color:#fff;">ピザ＆タピオカ配達中</div>
+              <div style="font-size:11px; color:#a1a1aa;" id="deliveryRiderName">配達員: 田中先輩 (自転車)</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:16px; font-weight:800; color:#fbbf24; font-family:var(--font-code);" id="deliveryEtaBig">15:48</div>
+              <div style="font-size:10px; color:#71717a;">到着予定</div>
+            </div>
+          </div>
+          <div class="delivery-step-bar">
+            <div class="delivery-step-line"><div class="delivery-step-line-fill" id="deliveryFill"></div></div>
+            <div class="delivery-node active-node">✓</div>
+            <div class="delivery-node active-node">👨‍🍳</div>
+            <div class="delivery-node active-node">🛵</div>
+            <div class="delivery-node">🏠</div>
+          </div>
+          <div style="font-size:11px; color:#cbd5e1; text-align:center;" id="deliveryStatusMsg">
+            まもなく学校の正門付近に到着します
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. 通知トースト (アイランドから滴るように展開) -->
+      <div class="island-view" id="view-toast">
+        <div class="island-toast-view flex-view">
+          <div class="toast-bell">🔔</div>
+          <div class="toast-body">
+            <h5 id="islandToastTitle">電技研 公式通知</h5>
+            <p id="islandToastBody">Web班の展示へようこそ！上のカプセルを触ってみてください。</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ヘッダー -->
   <header>
     <div class="header-inner">
-      <div style="display:flex; align-items:center; gap:8px;">
-        <span class="badge">芝生祭 Web研</span>
-        <h1 class="header-title">リキッドグラス＆アイランドUIラボ</h1>
+      <div class="brand-title">
+        <span class="brand-badge">芝生祭</span>
+        <div class="title-group">
+          <h1>電子技術研究部 Web班 展示ラボ</h1>
+          <p>「CSSの数行で、サイトの印象と心地よさはここまで変わる」検証ブース</p>
+        </div>
       </div>
-      <div style="font-size:12px; color:var(--text-muted); font-family:var(--font-mono);">
-        CSS Spring & Backdrop-Filter
+
+      <!-- 交代タイマー -->
+      <div class="timer-badge">
+        <span>交代目安:</span>
+        <span class="timer-display" id="timerDisplay">15:00</span>
+        <button class="timer-btn" id="timerToggle" onclick="toggleTimer()">計測</button>
+        <button class="timer-btn" onclick="resetTimer()">初期化</button>
       </div>
     </div>
   </header>
 
-  <!-- 上部ドロップ通知 -->
-  <div id="liquidToast" class="liquid-toast">
-    <span style="color:#22c55e;">●</span>
-    <span id="toastMsg">Dynamic Islandを展開しました</span>
-  </div>
-
-  <!-- ==============================================
-       Dynamic Island (リキッドグラス仕様)
-  =============================================== -->
-  <div class="island-wrapper">
-    <!-- アイランド本体 -->
-    <div id="dynamicIsland" class="island-container" onclick="toggleIslandExpand()">
-      
-      <!-- ① コンパクト表示（通常時） -->
-      <div class="island-compact" id="compactView">
-        <!-- JSで差し替え -->
-      </div>
-
-      <!-- ② 展開時ビュー（リキッド拡大時） -->
-      <div class="island-expanded-view" id="expandedView">
-        <!-- JSで差し替え -->
-      </div>
-
-    </div>
-
-    <!-- アイランドのモード切り替え -->
-    <div class="island-selector">
-      <button class="island-btn active" onclick="setIslandApp('music', this)">🎵 ミュージック</button>
-      <button class="island-btn" onclick="setIslandApp('map', this)">🧭 マップ案内</button>
-      <button class="island-btn" onclick="setIslandApp('uber', this)">🍔 Uber 配達</button>
-    </div>
-  </div>
-
-  <!-- メイン実験ステージ -->
+  <!-- メインコンテンツ -->
   <main>
 
-    <div class="grid-layout">
+    <!-- ナビゲーションタブ -->
+    <nav class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('island-section', this)">
+        <span>🏝️</span> ダイナミックアイランド操作盤
+      </button>
+      <button class="tab-btn" onclick="switchTab('modal-section', this)">
+        <span>①</span> ポップアップ演出 (Modal)
+      </button>
+      <button class="tab-btn" onclick="switchTab('button-section', this)">
+        <span>②</span> ボタン押し心地 (Hover & Click)
+      </button>
+      <button class="tab-btn" onclick="switchTab('custom-section', this)">
+        <span>③</span> イージング調合ラボ (自由調整)
+      </button>
+    </nav>
+
+    <!-- ==============================================
+         セクション：ダイナミックアイランド・コントローラー
+    =============================================== -->
+    <div id="island-section" class="section-grid tab-content">
       
-      <!-- 操作パネル -->
-      <div class="glass-card">
-        <div style="margin-bottom:16px;">
-          <span style="font-size:11px; font-weight:700; color:var(--accent-shiba); letter-spacing:0.05em;">EXPERIMENT</span>
-          <h2 style="font-size:18px; font-weight:700; margin-top:2px;">リキッドグラスのUI挙動</h2>
-          <p style="font-size:12px; color:var(--text-muted); margin-top:4px;">
-            上のDynamic Islandをタップするか、下のボタンでリキッド（液状バネ）のポップアップを試せます。
+      <div class="card">
+        <div class="panel-heading">
+          <div class="panel-tag">Special Feature</div>
+          <h2 class="panel-title">ダイナミックアイランド・シミュレータ</h2>
+          <p class="panel-desc">
+            画面最上部の黒いカプセルを直接クリック（またはタップ）するか、下のボタンでライブアクティビティを切り替えてみてください。
           </p>
         </div>
 
-        <div style="display:flex; flex-direction:column; gap:10px;">
-          <button class="glass-btn glass-btn-primary" onclick="openLiquidModal()">
-            ✨ リキッド・モーダルを開く
+        <div class="preset-list">
+          <div class="preset-item active" onclick="setIslandApp('music', this)">
+            <div class="label-row">
+              <span class="preset-name">🎵 音楽プレイヤー (Music)</span>
+              <span class="preset-badge" style="background:#e8f5e9; color:#2e7d32;">イコライザー連動</span>
+            </div>
+            <div class="preset-css">リアルタイムで波形がアニメーション稼働中</div>
+          </div>
+
+          <div class="preset-item" onclick="setIslandApp('maps', this)">
+            <div class="label-row">
+              <span class="preset-name">🗺️ リアルタイム道案内 (Turn-by-Turn)</span>
+              <span class="preset-badge" style="background:#e0f2fe; color:#0369a1;">自動更新</span>
+            </div>
+            <div class="preset-css">3秒ごとに案内・距離・矢印が自動で進行</div>
+          </div>
+
+          <div class="preset-item" onclick="setIslandApp('delivery', this)">
+            <div class="label-row">
+              <span class="preset-name">🛵 配達追跡 (Uber / 出前館)</span>
+              <span class="preset-badge" style="background:#fef3c7; color:#b45309;">ステータス追従</span>
+            </div>
+            <div class="preset-css">調理中からバイクの接近までプログレス遷移</div>
+          </div>
+        </div>
+
+        <!-- アクションボタン -->
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:16px;">
+          <button class="btn-primary" onclick="triggerIslandNotification()" style="width:100%; padding:12px;">
+            🔔 アイランドから通知をドロップ（液体展開）
           </button>
-          <button class="glass-btn" onclick="triggerToastNotice()">
-            💧 天井からの水滴トースト通知
+          <button class="btn-secondary" onclick="toggleIslandExpansion()" style="width:100%; padding:10px;">
+            ↔ カプセルを最大化 / 最小化
           </button>
         </div>
 
-        <!-- CSSコードインスペクター -->
-        <div class="code-display">
-          <div style="font-size:10px; color:#888; margin-bottom:4px;">APPLIED CSS CURVE</div>
-          <pre id="codeView">.island-container {
+        <div class="code-box">
+          <div class="code-box-header">
+            <span>DYNAMIC ISLAND CSS (LIQUID GLASS)</span>
+          </div>
+          <pre>.dynamic-island {
   backdrop-filter: blur(25px) saturate(180%);
-  transition: width 0.48s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-              height 0.48s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: width 0.45s cubic-bezier(0.32, 1.25, 0.32, 1.02),
+              height 0.45s cubic-bezier(0.32, 1.25, 0.32, 1.02),
+              border-radius 0.45s cubic-bezier(0.32, 1.25, 0.32, 1.02);
+  transform-origin: center top;
 }</pre>
         </div>
       </div>
 
-      <!-- 技術解説・触感ステージ -->
-      <div class="glass-card" style="display:flex; flex-direction:column; justify-content:space-between;">
-        <div>
-          <h3 style="font-size:16px; font-weight:700; margin-bottom:8px;">💡「リキッドグラス」をつくるCSSの秘密</h3>
-          <p style="font-size:13px; color:var(--text-muted); line-height:1.7;">
-            AppleのDynamic Islandが「生きた水銀」のように見える理由は、単にサイズを広げているのではなく、<strong>ベジェ曲線に1.0を超えるオーバーシュート値（行き過ぎて戻る）</strong>を与えているからです。<br>
-            さらに <code style="font-family:var(--font-mono); font-size:11px; background:#efebe4; padding:2px 4px; border-radius:4px;">backdrop-filter: blur()</code> と <code style="font-family:var(--font-mono); font-size:11px; background:#efebe4; padding:2px 4px; border-radius:4px;">saturate()</code> を重ねることで、奥の生成色が屈折したリキッドグラスの質感が完成します。
+      <div class="card stage-card">
+        <div class="stage-status">
+          <span>アイランド体感ステージ</span>
+          <span>最上部の黒いカプセルが有機的に伸縮します</span>
+        </div>
+
+        <div style="text-align: center; max-width: 380px;">
+          <div style="font-size: 42px; margin-bottom: 12px;">👆</div>
+          <h3 style="font-size: 17px; font-weight: 700; margin-bottom: 8px;">画面上部のカプセルを触ってみてください</h3>
+          <p style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+            ただの四角形を広げるのではなく、角丸（border-radius）と寸法を、Apple独自の「オーガニックスプリング（跳ね返り係数）」で同時に遷移させることで、まるで本物の液体シリコンのような触感を作っています。
           </p>
         </div>
 
-        <div style="background:var(--kinari-sub); padding:16px; border-radius:14px; margin-top:16px; border:1px solid var(--glass-border);">
-          <div style="font-size:12px; font-weight:700; margin-bottom:6px;">リアルタイム触感テスト</div>
-          <div style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">クリックした瞬間の縮みと反発の感触：</div>
-          <button class="glass-btn" style="width:100%;" onclick="this.style.transform='scale(0.92)'; setTimeout(()=>this.style.transform='', 140);">
-            ポヨンと跳ねるボタンをタップ
+        <div class="commentary-box">
+          <strong>【部員の解説】リキッドグラスの秘密:</strong><br>
+          単に黒ベタで広げるのではなく、`backdrop-filter: blur(25px)` による背後のすりガラスぼかしと、`inset 0 1px 1px rgba(255,255,255,0.3)` の極薄ハイライトを入れることで、画面から浮き上がった実在感を生み出しています。
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==============================================
+         セクション①: ポップアップ・モーダル演出
+    =============================================== -->
+    <div id="modal-section" class="section-grid tab-content" style="display:none;">
+      
+      <div class="card">
+        <div class="panel-heading">
+          <div class="panel-tag">Interaction 01</div>
+          <h2 class="panel-title">ダイアログの「出現演出」を比較</h2>
+          <p class="panel-desc">同じ「確認ダイアログ」でも、表示される速度・軌道・減速カーブ次第で、安心感・威圧感・ゲーム感が激変します。</p>
+        </div>
+
+        <div class="preset-list">
+          <div class="preset-item active" onclick="setModalMode('refined', this)">
+            <div class="label-row">
+              <span class="preset-name">A. 上質・バネ減速（推奨）</span>
+              <span class="preset-badge" style="background:#e8f5e9; color:#2e7d32;">心地よい</span>
+            </div>
+            <div class="preset-css">scale(0.92→1) / cubic-bezier(0.16, 1, 0.3, 1)</div>
+          </div>
+
+          <div class="preset-item" onclick="setModalMode('instant', this)">
+            <div class="label-row">
+              <span class="preset-name">B. 演出なし（0秒出現）</span>
+              <span class="preset-badge">紙芝居感</span>
+            </div>
+            <div class="preset-css">transition: none; (即座に切り替え)</div>
+          </div>
+
+          <div class="preset-item" onclick="setModalMode('bottomsheet', this)">
+            <div class="label-row">
+              <span class="preset-name">C. スマホ風ボトムシート</span>
+              <span class="preset-badge">片手操作感</span>
+            </div>
+            <div class="preset-css">translateY(100%→0) / 画面下からせり出し</div>
+          </div>
+
+          <div class="preset-item" onclick="setModalMode('shake', this)">
+            <div class="label-row">
+              <span class="preset-name">D. 警告シェイク（強い注意）</span>
+              <span class="preset-badge" style="background:#ffebee; color:#c62828;">緊迫感</span>
+            </div>
+            <div class="preset-css">animation: modalShake 0.4s (画面揺れ)</div>
+          </div>
+
+          <div class="preset-item" onclick="setModalMode('flip', this)">
+            <div class="label-row">
+              <span class="preset-name">E. 3Dフリップ立体出現</span>
+              <span class="preset-badge">アトラクション感</span>
+            </div>
+            <div class="preset-css">perspective(1000px) rotateX(-30deg→0)</div>
+          </div>
+        </div>
+
+        <div class="code-box">
+          <div class="code-box-header">
+            <span>適用中のCSS定義</span>
+            <span id="modalModeTag">mode-refined</span>
+          </div>
+          <pre id="modalCodeSnippet">.modal-container {
+  transform: scale(0.92) translateY(12px);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.32s ease-out;
+}</pre>
+        </div>
+      </div>
+
+      <div class="card stage-card">
+        <div class="stage-status">
+          <span>検証エリア</span>
+          <span>下のボタンを押すとダイアログが出現します</span>
+        </div>
+
+        <div style="text-align: center;">
+          <button class="trigger-action-btn" onclick="openModal()">
+            ダイアログを開いてみる
           </button>
+        </div>
+
+        <div class="commentary-box" id="modalCommentary">
+          <strong>【部員の解説】上質・バネ減速:</strong> 人の目は0.1秒未満の変化を「瞬間」と認識し、0.5秒を超えると「遅延」と感じます。0.3秒で92%からわずかに手前に飛び出す演出は、最も自然で高級感のあるUIの鉄則です。
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==============================================
+         セクション②: ボタン押し心地
+    =============================================== -->
+    <div id="button-section" class="section-grid tab-content" style="display:none;">
+      
+      <div class="card">
+        <div class="panel-heading">
+          <div class="panel-tag">Interaction 02</div>
+          <h2 class="panel-title">ボタンの「触感」を比較</h2>
+          <p class="panel-desc">マウスを重ねた瞬間（hover）と押した瞬間（active）の戻り速度で、物理的な重さの錯覚が生まれます。</p>
+        </div>
+
+        <div class="preset-list">
+          <div class="preset-item active" onclick="setBtnPreset('spring', this)">
+            <div class="label-row">
+              <span class="preset-name">1. スプリング・バウンス</span>
+              <span class="preset-badge" style="background:#e8f5e9; color:#2e7d32;">心地よい反発</span>
+            </div>
+            <div class="preset-css">cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s</div>
+          </div>
+
+          <div class="preset-item" onclick="setBtnPreset('linear', this)">
+            <div class="label-row">
+              <span class="preset-name">2. 機械的等速 (Linear)</span>
+              <span class="preset-badge">ロボット的</span>
+            </div>
+            <div class="preset-css">transition: all 0.8s linear;</div>
+          </div>
+
+          <div class="preset-item" onclick="setBtnPreset('sluggish', this)">
+            <div class="label-row">
+              <span class="preset-name">3. もっさり重たい (2.0s)</span>
+              <span class="preset-badge" style="background:#fff3e0; color:#b78103;">イライラ感</span>
+            </div>
+            <div class="preset-css">transition: all 2.0s ease-in-out;</div>
+          </div>
+
+          <div class="preset-item" onclick="setBtnPreset('none', this)">
+            <div class="label-row">
+              <span class="preset-name">4. トランジション無し</span>
+              <span class="preset-badge">カチコチ</span>
+            </div>
+            <div class="preset-css">transition: none;</div>
+          </div>
+        </div>
+
+        <div class="code-box">
+          <div class="code-box-header">
+            <span>BUTTON CSS</span>
+            <span id="btnPresetTag">spring</span>
+          </div>
+          <pre id="btnCodeSnippet">.test-btn {
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.test-btn:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 18px rgba(46, 125, 50, 0.25);
+}</pre>
+        </div>
+      </div>
+
+      <div class="card stage-card">
+        <div class="stage-status">
+          <span>ボタン触感ステージ</span>
+          <span>マウスを重ねたりクリックしてみてください</span>
+        </div>
+
+        <div style="text-align:center;">
+          <button id="interactiveBtn" class="trigger-action-btn" style="transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);">
+            芝生祭 Web研へようこそ
+          </button>
+          <div style="margin-top: 16px; font-size: 12px; color: var(--text-muted); font-family: var(--font-code);">
+            クリックカウント: <span id="clickCounter" style="font-weight:700; color:var(--text-main);">0</span> 回
+          </div>
+        </div>
+
+        <div class="commentary-box" id="btnCommentary">
+          <strong>【部員の解説】バネの跳ね返り:</strong> 押して離した瞬間の「ポヨン」とした反発が、ガラスの画面を物理ボタンのように錯覚させます。
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==============================================
+         セクション③: 自由調整ラボ
+    =============================================== -->
+    <div id="custom-section" class="section-grid tab-content" style="display:none;">
+      
+      <div class="card">
+        <div class="panel-heading">
+          <div class="panel-tag">Interaction 03</div>
+          <h2 class="panel-title">イージング調合ラボ</h2>
+          <p class="panel-desc">スライダーを動かして、自分だけの最適なアニメーション数値を実験してみましょう。</p>
+        </div>
+
+        <div style="background:var(--kinari-subcard); padding:16px; border-radius:8px; border:1px solid var(--border-color);">
+          <div class="slider-row">
+            <span>アニメーション時間 (Duration):</span>
+            <span id="valDuration" style="font-family:var(--font-code); font-weight:700;">0.30s</span>
+          </div>
+          <input type="range" id="sliderDuration" min="0.05" max="2.0" step="0.05" value="0.30" style="width:100%; margin-bottom:16px;" oninput="updateCustom()">
+
+          <div class="slider-row">
+            <span>バウンス強度 (Overshoot):</span>
+            <span id="valBounce" style="font-family:var(--font-code); font-weight:700;">1.4</span>
+          </div>
+          <input type="range" id="sliderBounce" min="0.8" max="2.5" step="0.1" value="1.4" style="width:100%;" oninput="updateCustom()">
+        </div>
+
+        <div class="code-box">
+          <div class="code-box-header">
+            <span>CUSTOM CSS BEZIER</span>
+          </div>
+          <pre id="customCodeSnippet">transition: all 0.30s cubic-bezier(0.34, 1.40, 0.64, 1);</pre>
+        </div>
+      </div>
+
+      <div class="card stage-card">
+        <div class="stage-status">
+          <span>カスタム調整ステージ</span>
+          <span>設定したイージングで跳ねます</span>
+        </div>
+
+        <div style="text-align:center;">
+          <button id="customDemoBtn" class="trigger-action-btn" onclick="testCustomPop()">
+            クリックでポップテスト
+          </button>
+        </div>
+
+        <div class="commentary-box">
+          スライダーを最大にするとアニメーションがゴムのように激しく跳ね、最小にすると減速せずに固い動きになります。「使いやすさと楽しさのバランス」を探してみてください。
         </div>
       </div>
 
@@ -486,170 +1290,344 @@
   </main>
 
   <!-- ==============================================
-       リキッド・グラス・モーダル
+       共通モーダルコンテナ
   =============================================== -->
-  <div id="liquidModal" class="liquid-modal-overlay" onclick="handleModalBgClick(event)">
-    <div class="liquid-modal-box" id="modalBox">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <span style="font-size:12px; font-weight:700; color:var(--accent-shiba); font-family:var(--font-mono);">LIQUID GLASS POP</span>
-        <span style="cursor:pointer; font-size:18px; color:var(--text-muted);" onclick="closeLiquidModal()">✕</span>
-      </div>
-      <h3 style="font-size:19px; font-weight:700; margin-bottom:8px;">浮遊するすりガラス演出</h3>
-      <p style="font-size:13px; color:var(--text-muted); line-height:1.6; margin-bottom:20px;">
-        生成色（きなり色）の背景をぼかして取り込み、弾力のあるcubic-bezierで中心から膨らむように展開させています。
+  <div class="modal-overlay mode-refined" id="modalOverlay" onclick="handleBackdropClick(event)">
+    <div class="modal-container" id="modalBox">
+      <h3 id="modalHeading">芝生祭 Web研へようこそ</h3>
+      <p id="modalBodyText">
+        これは同一のHTML構造で作られたダイアログです。<br>
+        CSSのイージングとトランスフォームの組み合わせだけで、受け取る印象や感情が劇的に変化することを体感できましたか？
       </p>
-      <div style="display:flex; justify-content:flex-end; gap:8px;">
-        <button class="glass-btn" onclick="closeLiquidModal()">閉じる</button>
-        <button class="glass-btn glass-btn-primary" onclick="closeLiquidModal(); triggerToastNotice('設定を完了しました');">体感した！</button>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal()">キャンセル</button>
+        <button class="btn-primary" onclick="closeModal(); triggerIslandNotification('ダイアログの確認完了！');">確認しました</button>
       </div>
     </div>
   </div>
 
+  <!-- フッター -->
+  <footer>
+    <div class="footer-inner">
+      <div>芝生祭 電子技術研究部 Web研究班 | 生成色×リキッドグラス展示</div>
+      <div>Designed with Pure CSS & Vanilla JS</div>
+    </div>
+  </footer>
+
   <!-- ==============================================
-       インタラクション・スクリプト
+       制御スクリプト
   =============================================== -->
   <script>
-    // Dynamic Island アプリケーション状態
+    // タブ切り替え
+    function switchTab(sectionId, btn) {
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      document.getElementById(sectionId).style.display = 'grid';
+
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    /* ----------------------------------------------------
+       🌟 ダイナミックアイランドの挙動ロジック
+    ---------------------------------------------------- */
+    const island = document.getElementById('dynamicIsland');
     let currentApp = 'music';
     let isExpanded = false;
+    let toastTimeout = null;
 
-    const island = document.getElementById('dynamicIsland');
-    const compactView = document.getElementById('compactView');
-    const expandedView = document.getElementById('expandedView');
+    // アプリ切り替え
+    function setIslandApp(app, el) {
+      currentApp = app;
+      document.querySelectorAll('#island-section .preset-item').forEach(i => i.classList.remove('active'));
+      if (el) el.classList.add('active');
 
-    const appTemplates = {
-      music: {
-        compact: `
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span style="font-size:15px;">💿</span>
-            <span style="font-size:12px; font-family:var(--font-mono);">Web研 Radio</span>
-          </div>
-          <div class="wave-box">
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-            <div class="wave-bar"></div>
-          </div>
-        `,
-        expanded: `
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div style="display:flex; gap:12px; align-items:center;">
-              <div style="width:44px; height:44px; border-radius:10px; background:#1db954; display:flex; align-items:center; justify-content:center; font-size:22px;">🎧</div>
-              <div>
-                <div style="font-size:14px; font-weight:700;">CSS Anthem (2026 Remaster)</div>
-                <div style="font-size:11px; color:#aaa;">芝生祭 電技研 - Web研究班</div>
-              </div>
-            </div>
-            <div class="wave-box" style="height:20px;">
-              <div class="wave-bar" style="height:16px;"></div>
-              <div class="wave-bar" style="height:22px;"></div>
-              <div class="wave-bar" style="height:12px;"></div>
-            </div>
-          </div>
-          <div class="progress-track"><div class="progress-fill" style="width:45%;"></div></div>
-          <div style="display:flex; justify-content:space-between; font-size:11px; color:#888; font-family:var(--font-mono);">
-            <span>1:24</span><span>-2:06</span>
-          </div>
-        `
+      // トースト状態なら解除
+      island.classList.remove('state-toast');
+
+      document.querySelectorAll('.island-view').forEach(v => v.classList.remove('active-view'));
+      const activeV = document.getElementById(`view-${app}`);
+      activeV.classList.add('active-view');
+
+      // 展開状態の同期
+      applyExpansionState();
+    }
+
+    // 展開・格納の切り替え
+    function toggleIslandExpansion() {
+      // トーストが出ている場合は通常状態に戻す
+      if (island.classList.contains('state-toast')) {
+        island.classList.remove('state-toast');
+        isExpanded = false;
+        applyExpansionState();
+        return;
+      }
+      isExpanded = !isExpanded;
+      applyExpansionState();
+    }
+
+    function applyExpansionState() {
+      if (isExpanded) {
+        island.classList.remove('state-compact');
+        island.classList.add('state-expanded');
+        // 各アプリのexpandedビューを表示
+        if(currentApp === 'music') {
+          document.getElementById('music-compact').style.display = 'none';
+          document.getElementById('music-expanded').style.display = 'flex';
+        } else if(currentApp === 'maps') {
+          document.getElementById('maps-compact').style.display = 'none';
+          document.getElementById('maps-expanded').style.display = 'flex';
+        } else if(currentApp === 'delivery') {
+          document.getElementById('uber-compact').style.display = 'none';
+          document.getElementById('uber-expanded').style.display = 'flex';
+        }
+      } else {
+        island.classList.remove('state-expanded');
+        island.classList.add('state-compact');
+        // 各アプリのcompactビューを表示
+        if(currentApp === 'music') {
+          document.getElementById('music-compact').style.display = 'flex';
+          document.getElementById('music-expanded').style.display = 'none';
+        } else if(currentApp === 'maps') {
+          document.getElementById('maps-compact').style.display = 'flex';
+          document.getElementById('maps-expanded').style.display = 'none';
+        } else if(currentApp === 'delivery') {
+          document.getElementById('uber-compact').style.display = 'flex';
+          document.getElementById('uber-expanded').style.display = 'none';
+        }
+      }
+    }
+
+    // ナビ・マップのリアルタイム道案内ループ（3秒ごとに変わる）
+    const mapSteps = [
+      { arrow: '↗', compact: '200m先 電技研教室を右折', dist: '200m先', road: '高校棟 2F 電子技術研究部', detail: '次の指示: 正面階段を上がって右手の展示室へ' },
+      { arrow: '⬆', compact: '120m先 直進（中央廊下）', dist: '120m先', road: '高校棟 中央渡り廊下', detail: '次の指示: そのまままっすぐ理科実験室前を通過' },
+      { arrow: '↖', compact: '40m先 左折して展示教室へ', dist: '40m先', road: 'Web研究班 ブース入口', detail: '次の指示: ドアを開けて中にお入りください' },
+      { arrow: '🏁', compact: '目的地に到着しました！', dist: '到着', road: '芝生祭 Web研究展示ブース', detail: '展示ツアーをお楽しみください！' }
+    ];
+    let currentMapIndex = 0;
+    setInterval(() => {
+      currentMapIndex = (currentMapIndex + 1) % mapSteps.length;
+      const s = mapSteps[currentMapIndex];
+      // コンパクト
+      document.getElementById('compactNavIcon').textContent = s.arrow;
+      document.getElementById('compactNavText').textContent = s.compact;
+      // 展開
+      document.getElementById('expandedNavIcon').textContent = s.arrow;
+      document.getElementById('expandedNavDist').textContent = s.dist;
+      document.getElementById('expandedNavRoad').textContent = s.road;
+      document.getElementById('navStepDetail').textContent = s.detail;
+    }, 3500);
+
+    // 配達状況の自動推移ループ
+    const deliverySteps = [
+      { fill: '25%', eta: 'あと12分', msg: '店主が丹精込めて調理中です' },
+      { fill: '65%', eta: 'あと6分', msg: '配達員（田中先輩）が猛スピードで走行中' },
+      { fill: '90%', eta: 'あと1分', msg: 'まもなく学校の正門付近に到着します！' }
+    ];
+    let currentDeliveryIndex = 0;
+    setInterval(() => {
+      currentDeliveryIndex = (currentDeliveryIndex + 1) % deliverySteps.length;
+      const d = deliverySteps[currentDeliveryIndex];
+      document.getElementById('compactUberEta').textContent = d.eta;
+      document.getElementById('deliveryEtaBig').textContent = d.eta;
+      document.getElementById('deliveryFill').style.width = d.fill;
+      document.getElementById('deliveryStatusMsg').textContent = d.msg;
+    }, 4500);
+
+    // ダイナミックアイランドから滴る通知トースト
+    function triggerIslandNotification(customText) {
+      if (toastTimeout) clearTimeout(toastTimeout);
+
+      if (customText) {
+        document.getElementById('islandToastBody').textContent = customText;
+      }
+
+      document.querySelectorAll('.island-view').forEach(v => v.classList.remove('active-view'));
+      document.getElementById('view-toast').classList.add('active-view');
+
+      island.className = 'dynamic-island state-toast';
+
+      // 3.5秒後に元のアクティビティに有機的に復帰
+      toastTimeout = setTimeout(() => {
+        setIslandApp(currentApp);
+      }, 3500);
+    }
+
+    /* ----------------------------------------------------
+       モーダル出現演出
+    ---------------------------------------------------- */
+    let currentModalMode = 'refined';
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalModeTag = document.getElementById('modalModeTag');
+    const modalCodeSnippet = document.getElementById('modalCodeSnippet');
+    const modalCommentary = document.getElementById('modalCommentary');
+
+    const modalConfigs = {
+      refined: {
+        tag: 'mode-refined',
+        code: `.modal-container {\n  transform: scale(0.92) translateY(12px);\n  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),\n              opacity 0.32s ease-out;\n}`,
+        comment: '<strong>【部員の解説】上質・バネ減速:</strong> 0.3秒で92%からわずかに手前に飛び出す演出は、最も自然で高級感のあるUIの鉄則です。'
       },
-      map: {
-        compact: `
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span style="color:#38bdf8; font-size:14px;">↗</span>
-            <span style="font-size:12px; font-family:var(--font-mono);">150m先 右折</span>
-          </div>
-          <span style="font-size:11px; color:#38bdf8; font-family:var(--font-mono);">高校校舎</span>
-        `,
-        expanded: `
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div style="display:flex; gap:12px; align-items:center;">
-              <div style="width:44px; height:44px; border-radius:10px; background:#0284c7; display:flex; align-items:center; justify-content:center; font-size:22px; color:#fff;">↗</div>
-              <div>
-                <div style="font-size:15px; font-weight:700;">150m先を右折：展示教室</div>
-                <div style="font-size:11px; color:#aaa;">電技研 Web班展示ブース</div>
-              </div>
-            </div>
-            <span style="font-size:18px; color:#38bdf8; font-weight:700;">2分</span>
-          </div>
-          <div style="background:rgba(255,255,255,0.1); padding:8px 12px; border-radius:8px; font-size:11px; color:#cbd5e1;">
-            📍 まもなく左手に「電子技術研究部」の看板が見えます
-          </div>
-        `
+      instant: {
+        tag: 'mode-instant',
+        code: `.modal-overlay, .modal-container {\n  transition: none !important;\n  /* アニメーションなし */\n}`,
+        comment: '<strong>【部員の解説】演出なし:</strong> パッと瞬時に現れるため、どこから現れたのか視線が追いつかず、ユーザーを少し驚かせてしまいます。'
       },
-      uber: {
-        compact: `
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span style="font-size:14px;">🍔</span>
-            <span style="font-size:12px; font-family:var(--font-mono);">Uber Eats</span>
-          </div>
-          <span style="font-size:11px; color:#22c55e; font-weight:700;">8分で到着</span>
-        `,
-        expanded: `
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div style="display:flex; gap:12px; align-items:center;">
-              <div style="width:44px; height:44px; border-radius:10px; background:#06c167; display:flex; align-items:center; justify-content:center; font-size:20px;">🛵</div>
-              <div>
-                <div style="font-size:14px; font-weight:700;">芝生祭模擬店 スペシャルバーガー</div>
-                <div style="font-size:11px; color:#aaa;">配達パートナーが近づいています</div>
-              </div>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-size:16px; font-weight:700; color:#22c55e;">8分</div>
-              <div style="font-size:10px; color:#888;">14:32 到着予定</div>
-            </div>
-          </div>
-          <div class="progress-track"><div class="progress-fill" style="width:82%;"></div></div>
-        `
+      bottomsheet: {
+        tag: 'mode-bottomsheet',
+        code: `.modal-container {\n  transform: translateY(100%);\n  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);\n  /* 下端から片手操作向けにせり出し */\n}`,
+        comment: '<strong>【部員の解説】ボトムシート:</strong> スマートフォンの親指操作に最適化された演出。下からせり上がることで、直感的に「下へスワイプすれば消せる」感覚を連想させます。'
+      },
+      shake: {
+        tag: 'mode-shake',
+        code: `@keyframes modalShake {\n  20%, 80% { transform: translate3d(4px, 0, 0); }\n  30%, 70% { transform: translate3d(-6px, 0, 0); }\n}\n/* エラー・強い警告を連想 */`,
+        comment: '<strong>【部員の解説】警告シェイク:</strong> 赤い境界線と左右の微振動により、脳に「誤操作や危険」を強く意識させます。重要な警告にしか使ってはいけない演出です。'
+      },
+      flip: {
+        tag: 'mode-flip',
+        code: `.modal-overlay { perspective: 1000px; }\n.modal-container {\n  transform: rotateX(-30deg) translateY(-20px);\n  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);\n}`,
+        comment: '<strong>【部員の解説】3Dフリップ:</strong> 奥から手前にパタッと倒れてくる立体演出。ゲームのメニュー画面や特別なイベント告知にぴったりのワクワク感があります。'
       }
     };
 
-    function renderIsland() {
-      compactView.innerHTML = appTemplates[currentApp].compact;
-      expandedView.innerHTML = appTemplates[currentApp].expanded;
+    function setModalMode(mode, el) {
+      currentModalMode = mode;
+      modalOverlay.className = `modal-overlay mode-${mode}`;
+      modalModeTag.textContent = modalConfigs[mode].tag;
+      modalCodeSnippet.textContent = modalConfigs[mode].code;
+      modalCommentary.innerHTML = modalConfigs[mode].comment;
+
+      document.querySelectorAll('#modal-section .preset-item').forEach(item => item.classList.remove('active'));
+      el.classList.add('active');
     }
 
-    function setIslandApp(app, btn) {
-      currentApp = app;
-      renderIsland();
-      document.querySelectorAll('.island-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+    function openModal() { modalOverlay.classList.add('open'); }
+    function closeModal() { modalOverlay.classList.remove('open'); }
+    function handleBackdropClick(e) { if (e.target.id === 'modalOverlay') closeModal(); }
 
-      // 演出として一瞬ポヨンと揺らす
-      island.style.transform = 'scale(1.08)';
-      setTimeout(() => island.style.transform = '', 180);
+    /* ----------------------------------------------------
+       ボタン押し心地
+    ---------------------------------------------------- */
+    const interactiveBtn = document.getElementById('interactiveBtn');
+    const btnCodeSnippet = document.getElementById('btnCodeSnippet');
+    const btnPresetTag = document.getElementById('btnPresetTag');
+    const btnCommentary = document.getElementById('btnCommentary');
+    const clickCounter = document.getElementById('clickCounter');
+    let clickCount = 0;
+
+    interactiveBtn.addEventListener('click', () => {
+      clickCount++;
+      clickCounter.textContent = clickCount;
+      interactiveBtn.style.transform = 'scale(0.96)';
+      setTimeout(() => interactiveBtn.style.transform = '', 120);
+    });
+
+    const btnConfigs = {
+      spring: {
+        tag: 'spring',
+        style: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        code: `.test-btn {\n  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);\n}`,
+        comment: '<strong>【部員の解説】バネの跳ね返り:</strong> 押して離した瞬間の「ポヨン」とした反発が、ガラスの画面を物理ボタンのように錯覚させます。'
+      },
+      linear: {
+        tag: 'linear',
+        style: 'all 0.8s linear',
+        code: `.test-btn {\n  transition: all 0.8s linear;\n}`,
+        comment: '<strong>【部員の解説】機械的等速:</strong> スピードが常に一定のため、指の動きと同期せず、重い機械を動かしているような違和感があります。'
+      },
+      sluggish: {
+        tag: 'sluggish',
+        style: 'all 2.0s ease-in-out',
+        code: `.test-btn {\n  transition: all 2.0s ease-in-out;\n}`,
+        comment: '<strong>【部員の解説】遅すぎるアニメーション:</strong> 反応が終わるまで2秒かかるため、「画面が固まったか」と不安を与えてしまいます。'
+      },
+      none: {
+        tag: 'none',
+        style: 'none',
+        code: `.test-btn {\n  transition: none;\n}`,
+        comment: '<strong>【部員の解説】トランジション無し:</strong> パッとした瞬時の切り替わり。レトロ感はありますが、現代では安っぽく感じられます。'
+      }
+    };
+
+    function setBtnPreset(mode, el) {
+      interactiveBtn.style.transition = btnConfigs[mode].style;
+      btnPresetTag.textContent = btnConfigs[mode].tag;
+      btnCodeSnippet.textContent = btnConfigs[mode].code;
+      btnCommentary.innerHTML = btnConfigs[mode].comment;
+
+      document.querySelectorAll('#button-section .preset-item').forEach(item => item.classList.remove('active'));
+      el.classList.add('active');
     }
 
-    function toggleIslandExpand() {
-      isExpanded = !isExpanded;
-      if (isExpanded) {
-        island.classList.add('expanded');
+    /* ----------------------------------------------------
+       カスタムスライダー調整
+    ---------------------------------------------------- */
+    function updateCustom() {
+      const dur = parseFloat(document.getElementById('sliderDuration').value).toFixed(2);
+      const bnc = parseFloat(document.getElementById('sliderBounce').value).toFixed(2);
+
+      document.getElementById('valDuration').textContent = `${dur}s`;
+      document.getElementById('valBounce').textContent = bnc;
+
+      const css = `transition: all ${dur}s cubic-bezier(0.34, ${bnc}, 0.64, 1);`;
+      document.getElementById('customCodeSnippet').textContent = css;
+
+      const btn = document.getElementById('customDemoBtn');
+      btn.style.transition = `all ${dur}s cubic-bezier(0.34, ${bnc}, 0.64, 1)`;
+    }
+
+    function testCustomPop() {
+      const btn = document.getElementById('customDemoBtn');
+      btn.style.transform = 'scale(1.15) translateY(-6px)';
+      setTimeout(() => {
+        btn.style.transform = 'scale(1) translateY(0)';
+      }, 150);
+    }
+    updateCustom();
+
+    /* ----------------------------------------------------
+       交代タイマー
+    ---------------------------------------------------- */
+    let timerSeconds = 15 * 60;
+    let timerRunning = false;
+    let timerInterval = null;
+
+    function renderTimer() {
+      const m = Math.floor(timerSeconds / 60);
+      const s = timerSeconds % 60;
+      document.getElementById('timerDisplay').textContent = 
+        `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+
+    function toggleTimer() {
+      const btn = document.getElementById('timerToggle');
+      if (timerRunning) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        btn.textContent = '再開';
       } else {
-        island.classList.remove('expanded');
+        timerRunning = true;
+        btn.textContent = '停止';
+        timerInterval = setInterval(() => {
+          if (timerSeconds > 0) {
+            timerSeconds--;
+            renderTimer();
+          } else {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            btn.textContent = '終了';
+            triggerIslandNotification('【交代時間】15分が経過しました！');
+          }
+        }, 1000);
       }
     }
 
-    // 初期描画
-    renderIsland();
-
-    // モーダル操作
-    function openLiquidModal() {
-      document.getElementById('liquidModal').classList.add('open');
-    }
-    function closeLiquidModal() {
-      document.getElementById('liquidModal').classList.remove('open');
-    }
-    function handleModalBgClick(e) {
-      if(e.target.id === 'liquidModal') closeLiquidModal();
-    }
-
-    // 天井からの水滴トースト
-    function triggerToastNotice(text = '水滴のように滑らかにドロップしました') {
-      const toast = document.getElementById('liquidToast');
-      document.getElementById('toastMsg').textContent = text;
-      toast.classList.add('show');
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 2500);
+    function resetTimer() {
+      clearInterval(timerInterval);
+      timerRunning = false;
+      timerSeconds = 15 * 60;
+      renderTimer();
+      document.getElementById('timerToggle').textContent = '計測';
     }
   </script>
 </body>
