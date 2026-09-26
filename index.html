@@ -22,12 +22,12 @@
       --accent-light: #e8f5e9;
       --accent-alert: #c62828;
       
-      --font-base: -apple-system, BlinkMacSystemFont, "BIZ UDPGothic", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+      --font-base: -apple-system, BlinkMacSystemFont, "BIZ UDPGothic", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
       --font-code: "SF Mono", Monaco, Consolas, monospace;
 
-      /* iOS Liquid Glass 物理イージング */
-      --spring-island: cubic-bezier(0.32, 1.25, 0.32, 1.02);
-      --spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+      /* iOS Liquid Organic 物理スプリング */
+      --spring-island: cubic-bezier(0.32, 1.35, 0.28, 1);
+      --spring-fluid: cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     * {
@@ -91,7 +91,6 @@
       color: var(--text-muted);
     }
 
-    /* 交代サイクル用タイマー */
     .timer-badge {
       display: flex;
       align-items: center;
@@ -118,11 +117,11 @@
     }
 
     /* ===================================================
-       🌟 リキッドグラス・ダイナミックアイランド (最重要演出)
+       🌟 超本格リキッドグラス・ダイナミックアイランド
     =================================================== */
-    .island-screen-bar {
+    .island-container {
       position: fixed;
-      top: 14px;
+      top: 12px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 1000;
@@ -134,81 +133,99 @@
 
     .dynamic-island {
       pointer-events: auto;
-      background: rgba(10, 10, 10, 0.95);
+      background: radial-gradient(120% 120% at 50% 0%, rgba(35, 35, 38, 0.88) 0%, rgba(10, 10, 12, 0.96) 100%);
       color: #ffffff;
-      backdrop-filter: blur(25px) saturate(180%);
-      -webkit-backdrop-filter: blur(25px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(30px) saturate(190%);
+      -webkit-backdrop-filter: blur(30px) saturate(190%);
+      
+      /* リキッドグラス多重ガラスハイライト */
+      border: 1px solid rgba(255, 255, 255, 0.22);
       box-shadow: 
-        0 12px 32px rgba(0, 0, 0, 0.35),
-        0 2px 6px rgba(0, 0, 0, 0.2),
-        inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        0 14px 36px rgba(0, 0, 0, 0.45),
+        0 4px 10px rgba(0, 0, 0, 0.25),
+        inset 0 1px 1.5px rgba(255, 255, 255, 0.45),
+        inset 0 -1px 1px rgba(0, 0, 0, 0.6);
+      
       cursor: pointer;
       user-select: none;
       transform-origin: center top;
       transition: 
-        width 0.45s var(--spring-island),
-        height 0.45s var(--spring-island),
-        border-radius 0.45s var(--spring-island),
+        width 0.48s var(--spring-island),
+        height 0.48s var(--spring-island),
+        border-radius 0.48s var(--spring-island),
+        transform 0.2s var(--spring-fluid),
         box-shadow 0.3s ease;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       justify-content: center;
+      position: relative;
     }
 
-    /* アイランドの押し込み・プニプニ感（Squish） */
+    /* 表面の光沢反射（リキッド・グレア） */
+    .dynamic-island::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+      pointer-events: none;
+    }
+
+    /* アイランド押下時のプニプニ感（Fluid Squish） */
     .dynamic-island:active {
-      transform: scale(0.97);
+      transform: scale(0.96) scaleY(0.94);
     }
 
-    /* 状態A: コンパクト (通常カプセル) */
+    /* コンパクト時 */
     .dynamic-island.state-compact {
-      width: 190px;
+      width: 205px;
       height: 38px;
       border-radius: 20px;
       padding: 0 14px;
     }
 
-    /* 状態B: 展開 (Expanded Liquid Glass) */
+    /* 展開時（リキッド大窓） */
     .dynamic-island.state-expanded {
-      width: 360px;
-      height: 165px;
-      border-radius: 36px;
+      width: 375px;
+      height: 175px;
+      border-radius: 38px;
       padding: 16px 20px;
       box-shadow: 
-        0 20px 50px rgba(0, 0, 0, 0.5),
-        0 0 0 1px rgba(255, 255, 255, 0.15),
-        inset 0 1px 2px rgba(255, 255, 255, 0.4);
+        0 26px 60px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.18),
+        inset 0 1px 2px rgba(255, 255, 255, 0.5);
     }
 
-    /* 状態C: 通知ドロップ (Alert Drop) */
+    /* 通知ドロップ時 */
     .dynamic-island.state-toast {
-      width: 330px;
+      width: 340px;
       height: 74px;
-      border-radius: 24px;
+      border-radius: 26px;
       padding: 12px 18px;
     }
 
-    /* 内部ビューのフェード切り替え */
+    /* アプリビュー切り替えアニメ */
     .island-view {
       display: none;
       width: 100%;
       height: 100%;
       opacity: 0;
-      transition: opacity 0.25s ease 0.1s;
+      transition: opacity 0.25s ease 0.08s;
     }
     .island-view.active-view {
       display: flex;
       opacity: 1;
     }
 
-    /* --- [ビュー1: 音楽 (Music)] --- */
+    /* --- [1. 音楽アプリ: 実動シークバー＆秒数同期] --- */
     .compact-music {
       align-items: center;
       justify-content: space-between;
-      height: 100%;
       width: 100%;
+      height: 100%;
     }
     .compact-music .album-art {
       width: 22px;
@@ -220,7 +237,6 @@
       justify-content: center;
       font-size: 11px;
     }
-    /* リアルタイム音波イコライザー（CSS Keyframes） */
     .equalizer {
       display: flex;
       align-items: center;
@@ -231,7 +247,11 @@
       width: 3px;
       background: #22c55e;
       border-radius: 2px;
-      animation: eqBounce 1s ease-in-out infinite alternate;
+      animation: eqBounce 0.9s ease-in-out infinite alternate;
+    }
+    .eq-bar.paused {
+      animation-play-state: paused;
+      height: 4px !important;
     }
     .eq-bar:nth-child(1) { height: 6px; animation-delay: 0.1s; }
     .eq-bar:nth-child(2) { height: 14px; animation-delay: 0.3s; }
@@ -257,7 +277,7 @@
       height: 52px;
       border-radius: 12px;
       background: linear-gradient(135deg, #22c55e, #15803d);
-      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+      box-shadow: 0 4px 14px rgba(34, 197, 94, 0.4);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -266,43 +286,50 @@
     .track-info h4 { font-size: 14px; font-weight: 700; color: #fff; }
     .track-info p { font-size: 11px; color: #a1a1aa; }
 
-    /* プログレスバー */
-    .track-bar-wrap {
+    /* 操作可能なシークバー */
+    .seek-container {
       width: 100%;
-      height: 4px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 2px;
+      cursor: pointer;
+      padding: 6px 0;
+    }
+    .seek-track {
+      width: 100%;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
       position: relative;
-      margin: 8px 0 4px;
+      overflow: hidden;
     }
-    .track-progress {
+    .seek-fill {
       height: 100%;
-      width: 48%;
+      width: 35%;
       background: #ffffff;
-      border-radius: 2px;
-      animation: trackPlay 15s linear infinite;
-    }
-    @keyframes trackPlay {
-      0% { width: 10%; }
-      100% { width: 90%; }
+      border-radius: 3px;
+      transition: width 0.1s linear;
     }
     .time-labels {
       display: flex;
       justify-content: space-between;
       font-size: 10px;
-      color: #71717a;
+      color: #a1a1aa;
       font-family: var(--font-code);
+      margin-top: 2px;
     }
     .music-controls {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 24px;
+      gap: 26px;
       font-size: 16px;
-      margin-top: 4px;
     }
+    .music-btn {
+      cursor: pointer;
+      padding: 4px;
+      transition: transform 0.15s;
+    }
+    .music-btn:active { transform: scale(0.85); }
 
-    /* --- [ビュー2: ナビ・マップ (Maps)] --- */
+    /* --- [2. ナビ・マップアプリ] --- */
     .compact-map {
       align-items: center;
       justify-content: space-between;
@@ -313,7 +340,6 @@
       color: #38bdf8;
       font-size: 15px;
       font-weight: 900;
-      transition: transform 0.3s var(--spring-bounce);
     }
     .compact-map-text {
       font-size: 11px;
@@ -337,8 +363,8 @@
       gap: 10px;
     }
     .big-nav-icon {
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
       background: #0284c7;
       border-radius: 12px;
       display: flex;
@@ -346,20 +372,16 @@
       justify-content: center;
       font-size: 22px;
       color: #fff;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
     }
-    .map-eta {
-      text-align: right;
-    }
+    .map-eta { text-align: right; }
     .map-eta-time {
       font-size: 16px;
       font-weight: 800;
       color: #22c55e;
       font-family: var(--font-code);
     }
-    .map-eta-dist {
-      font-size: 11px;
-      color: #94a3b8;
-    }
+    .map-eta-dist { font-size: 11px; color: #94a3b8; }
     .mini-route-preview {
       background: rgba(255, 255, 255, 0.08);
       border-radius: 10px;
@@ -372,16 +394,14 @@
       margin-top: 8px;
     }
 
-    /* --- [ビュー3: Uber / 配達 (Delivery)] --- */
+    /* --- [3. Uber / 配達追跡] --- */
     .compact-uber {
       align-items: center;
       justify-content: space-between;
       width: 100%;
       height: 100%;
     }
-    .uber-icon {
-      font-size: 13px;
-    }
+    .uber-icon { font-size: 13px; }
     .compact-uber-eta {
       font-size: 11px;
       font-weight: 700;
@@ -411,7 +431,7 @@
     }
     .delivery-step-line-fill {
       height: 100%;
-      width: 65%;
+      width: 70%;
       background: #fbbf24;
       transition: width 0.6s ease;
     }
@@ -435,7 +455,28 @@
       font-weight: bold;
     }
 
-    /* --- [ビュー4: 通知トースト (Toast/Alert)] --- */
+    /* --- [4. タイマー・ストップウォッチ] --- */
+    .compact-stopwatch {
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      height: 100%;
+    }
+    .expanded-stopwatch {
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      text-align: center;
+    }
+    .stopwatch-big-digits {
+      font-size: 32px;
+      font-weight: 800;
+      font-family: var(--font-code);
+      color: #fb923c;
+      letter-spacing: 0.05em;
+    }
+
+    /* --- [5. 通知ドロップ] --- */
     .island-toast-view {
       align-items: center;
       gap: 12px;
@@ -594,7 +635,6 @@
       color: var(--text-muted);
     }
 
-    /* ステージ側カード */
     .stage-card {
       display: flex;
       flex-direction: column;
@@ -821,47 +861,52 @@
 <body>
 
   <!-- ==============================================
-       画面上部：本物のリキッドグラス・ダイナミックアイランド
+       画面最上部：不定期稼働・リキッドグラス ダイナミックアイランド
   =============================================== -->
-  <div class="island-screen-bar">
-    <div class="dynamic-island state-compact" id="dynamicIsland" onclick="toggleIslandExpansion()">
+  <div class="island-container">
+    <div class="dynamic-island state-compact" id="dynamicIsland" onclick="handleIslandClick(event)">
       
-      <!-- 1. ミュージック表示 -->
+      <!-- 1. ミュージック表示（秒数反映 & シーク対応） -->
       <div class="island-view active-view" id="view-music">
-        <!-- コンパクト時 -->
         <div class="compact-music flex-view" id="music-compact">
           <div class="album-art">🎵</div>
-          <div style="font-size:11px; font-weight:700; color:#e4e4e7; margin:0 6px;">芝生祭 Official BGM</div>
-          <div class="equalizer">
+          <div style="font-size:11px; font-weight:700; color:#f4f4f5; margin:0 6px;">
+            <span id="compactTrackTitle">春雷</span>
+            <span style="font-family:var(--font-code); font-size:10px; color:#a1a1aa; margin-left:4px;" id="compactCurrentTime">01:24</span>
+          </div>
+          <div class="equalizer" id="musicEqualizer">
             <span class="eq-bar"></span>
             <span class="eq-bar"></span>
             <span class="eq-bar"></span>
             <span class="eq-bar"></span>
           </div>
         </div>
-        <!-- 展開時 (リキッドグラス大窓) -->
+
         <div class="expanded-music flex-view" id="music-expanded" style="display:none; width:100%;">
           <div class="expanded-music-top">
             <div class="big-art">🎧</div>
             <div class="track-info">
-              <h4>春雷 - Web研 Remix</h4>
+              <h4 id="expandedTrackTitle">春雷 - Web研 Remix</h4>
               <p>芝生祭 電技研サウンドトラック</p>
             </div>
           </div>
           <div>
-            <div class="track-bar-wrap">
-              <div class="track-progress"></div>
+            <!-- クリック/ドラッグで秒数シークできるトラック -->
+            <div class="seek-container" onclick="seekAudio(event)">
+              <div class="seek-track">
+                <div class="seek-fill" id="seekFill"></div>
+              </div>
             </div>
             <div class="time-labels">
-              <span>1:24</span>
-              <span>-2:06</span>
+              <span id="labelCurrentTime">01:24</span>
+              <span id="labelRemainTime">-02:16</span>
             </div>
           </div>
           <div class="music-controls">
-            <span>⏮</span>
-            <span style="font-size:22px;">⏸</span>
-            <span>⏭</span>
-            <span style="font-size:14px; color:#22c55e;">AirPlay 🌿</span>
+            <span class="music-btn" onclick="skipMusic(-15)">⏮ 15s</span>
+            <span class="music-btn" id="playPauseBtn" style="font-size:24px;" onclick="togglePlayPause(event)">⏸</span>
+            <span class="music-btn" onclick="skipMusic(15)">15s ⏭</span>
+            <span style="font-size:12px; color:#22c55e; font-weight:bold;">AirPlay 🌿</span>
           </div>
         </div>
       </div>
@@ -898,14 +943,14 @@
       <div class="island-view" id="view-delivery">
         <div class="compact-uber flex-view" id="uber-compact">
           <span class="uber-icon">🛵</span>
-          <span style="font-size:11px; font-weight:700; color:#f4f4f5;">芝生祭 出前館</span>
-          <span class="compact-uber-eta" id="compactUberEta">あと8分</span>
+          <span style="font-size:11px; font-weight:700; color:#f4f4f5;">出前館 配達中</span>
+          <span class="compact-uber-eta" id="compactUberEta">あと6分</span>
         </div>
         <div class="expanded-uber flex-view" id="uber-expanded" style="display:none; width:100%;">
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <div>
-              <div style="font-size:14px; font-weight:800; color:#fff;">ピザ＆タピオカ配達中</div>
-              <div style="font-size:11px; color:#a1a1aa;" id="deliveryRiderName">配達員: 田中先輩 (自転車)</div>
+              <div style="font-size:14px; font-weight:800; color:#fff;">ピザ＆タピオカ 配達中</div>
+              <div style="font-size:11px; color:#a1a1aa;">配達員: 田中先輩 (自転車)</div>
             </div>
             <div style="text-align:right;">
               <div style="font-size:16px; font-weight:800; color:#fbbf24; font-family:var(--font-code);" id="deliveryEtaBig">15:48</div>
@@ -913,7 +958,7 @@
             </div>
           </div>
           <div class="delivery-step-bar">
-            <div class="delivery-step-line"><div class="delivery-step-line-fill" id="deliveryFill"></div></div>
+            <div class="delivery-step-line"><div class="delivery-step-line-fill" id="deliveryFill" style="width:65%;"></div></div>
             <div class="delivery-node active-node">✓</div>
             <div class="delivery-node active-node">👨‍🍳</div>
             <div class="delivery-node active-node">🛵</div>
@@ -925,13 +970,30 @@
         </div>
       </div>
 
-      <!-- 4. 通知トースト (アイランドから滴るように展開) -->
+      <!-- 4. タイマー（ストップウォッチ）機能 -->
+      <div class="island-view" id="view-stopwatch">
+        <div class="compact-stopwatch flex-view" id="stopwatch-compact">
+          <span style="font-size:13px;">⏱️</span>
+          <span style="font-size:12px; font-family:var(--font-code); font-weight:700; color:#fb923c;" id="swCompactDigits">00:00.0</span>
+          <span style="font-size:10px; color:#71717a;">計測中</span>
+        </div>
+        <div class="expanded-stopwatch flex-view" id="stopwatch-expanded" style="display:none; width:100%;">
+          <div style="font-size:12px; color:#9ca3af; text-align:left;">電技研 ラップタイマー</div>
+          <div class="stopwatch-big-digits" id="swBigDigits">00:00.0</div>
+          <div style="display:flex; justify-content:center; gap:16px;">
+            <button class="btn-secondary" onclick="resetStopwatch(event)" style="font-size:11px; padding:4px 12px;">リセット</button>
+            <button class="btn-primary" id="swToggleBtn" onclick="toggleStopwatch(event)" style="font-size:11px; padding:4px 16px;">停止</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. 通知トースト (カプセルから滴るように拡張) -->
       <div class="island-view" id="view-toast">
         <div class="island-toast-view flex-view">
           <div class="toast-bell">🔔</div>
           <div class="toast-body">
-            <h5 id="islandToastTitle">電技研 公式通知</h5>
-            <p id="islandToastBody">Web班の展示へようこそ！上のカプセルを触ってみてください。</p>
+            <h5 id="islandToastTitle">芝生祭 Web研</h5>
+            <p id="islandToastBody">バックグラウンドで不定期にアプリが稼働しています。</p>
           </div>
         </div>
       </div>
@@ -950,7 +1012,6 @@
         </div>
       </div>
 
-      <!-- 交代タイマー -->
       <div class="timer-badge">
         <span>交代目安:</span>
         <span class="timer-display" id="timerDisplay">15:00</span>
@@ -980,7 +1041,7 @@
     </nav>
 
     <!-- ==============================================
-         セクション：ダイナミックアイランド・コントローラー
+         セクション：ダイナミックアイランド操作盤
     =============================================== -->
     <div id="island-section" class="section-grid tab-content">
       
@@ -989,38 +1050,54 @@
           <div class="panel-tag">Special Feature</div>
           <h2 class="panel-title">ダイナミックアイランド・シミュレータ</h2>
           <p class="panel-desc">
-            画面最上部の黒いカプセルを直接クリック（またはタップ）するか、下のボタンでライブアクティビティを切り替えてみてください。
+            アプリの切り替えは<strong>不定期（6〜14秒の間隔）</strong>で自動発生します。上部のカプセルを押して展開したり、シークバーで音楽の秒数を移動できます。
           </p>
         </div>
 
         <div class="preset-list">
-          <div class="preset-item active" onclick="setIslandApp('music', this)">
+          <div class="preset-item active" id="preset-music" onclick="setIslandApp('music', this)">
             <div class="label-row">
               <span class="preset-name">🎵 音楽プレイヤー (Music)</span>
-              <span class="preset-badge" style="background:#e8f5e9; color:#2e7d32;">イコライザー連動</span>
+              <span class="preset-badge" style="background:#e8f5e9; color:#2e7d32;">秒数同期 & シーク</span>
             </div>
-            <div class="preset-css">リアルタイムで波形がアニメーション稼働中</div>
+            <div class="preset-css">シークバーをクリックで自由移動・波形アニメ</div>
           </div>
 
-          <div class="preset-item" onclick="setIslandApp('maps', this)">
+          <div class="preset-item" id="preset-maps" onclick="setIslandApp('maps', this)">
             <div class="label-row">
               <span class="preset-name">🗺️ リアルタイム道案内 (Turn-by-Turn)</span>
-              <span class="preset-badge" style="background:#e0f2fe; color:#0369a1;">自動更新</span>
+              <span class="preset-badge" style="background:#e0f2fe; color:#0369a1;">自動進行</span>
             </div>
-            <div class="preset-css">3秒ごとに案内・距離・矢印が自動で進行</div>
+            <div class="preset-css">電技研展示教室への道順をライブ案内</div>
           </div>
 
-          <div class="preset-item" onclick="setIslandApp('delivery', this)">
+          <div class="preset-item" id="preset-delivery" onclick="setIslandApp('delivery', this)">
             <div class="label-row">
               <span class="preset-name">🛵 配達追跡 (Uber / 出前館)</span>
               <span class="preset-badge" style="background:#fef3c7; color:#b45309;">ステータス追従</span>
             </div>
-            <div class="preset-css">調理中からバイクの接近までプログレス遷移</div>
+            <div class="preset-css">注文中〜配達完了までのリアルタイムゲージ</div>
+          </div>
+
+          <div class="preset-item" id="preset-stopwatch" onclick="setIslandApp('stopwatch', this)">
+            <div class="label-row">
+              <span class="preset-name">⏱️ ラップタイマー (Stopwatch)</span>
+              <span class="preset-badge" style="background:#ffedd5; color:#c2410c;">0.1秒計測</span>
+            </div>
+            <div class="preset-css">ミリ秒単位で数字が滑らかに回転</div>
           </div>
         </div>
 
-        <!-- アクションボタン -->
-        <div style="display:flex; flex-direction:column; gap:8px; margin-top:16px;">
+        <!-- 不定期切り替えのコントロール -->
+        <div style="background:var(--kinari-subcard); padding:12px; border-radius:8px; border:1px solid var(--border-color); margin-top:14px; font-size:12px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <strong>不定期オート切り替え:</strong>
+            <span id="autoSwitchStatus" style="color:var(--accent-shiba); font-weight:bold;">稼働中 (6〜14秒)</span>
+          </div>
+          <button class="btn-secondary" onclick="toggleAutoSwitch()" style="font-size:11px;">ON / OFF</button>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:14px;">
           <button class="btn-primary" onclick="triggerIslandNotification()" style="width:100%; padding:12px;">
             🔔 アイランドから通知をドロップ（液体展開）
           </button>
@@ -1031,14 +1108,16 @@
 
         <div class="code-box">
           <div class="code-box-header">
-            <span>DYNAMIC ISLAND CSS (LIQUID GLASS)</span>
+            <span>LIQUID GLASS SHADING CSS</span>
           </div>
           <pre>.dynamic-island {
-  backdrop-filter: blur(25px) saturate(180%);
-  transition: width 0.45s cubic-bezier(0.32, 1.25, 0.32, 1.02),
-              height 0.45s cubic-bezier(0.32, 1.25, 0.32, 1.02),
-              border-radius 0.45s cubic-bezier(0.32, 1.25, 0.32, 1.02);
-  transform-origin: center top;
+  backdrop-filter: blur(30px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 
+    0 14px 36px rgba(0, 0, 0, 0.45),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.45),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.6);
+  transition: all 0.48s cubic-bezier(0.32, 1.35, 0.28, 1);
 }</pre>
         </div>
       </div>
@@ -1046,20 +1125,21 @@
       <div class="card stage-card">
         <div class="stage-status">
           <span>アイランド体感ステージ</span>
-          <span>最上部の黒いカプセルが有機的に伸縮します</span>
+          <span>不定期にバックグラウンドタスクが自律稼働します</span>
         </div>
 
         <div style="text-align: center; max-width: 380px;">
-          <div style="font-size: 42px; margin-bottom: 12px;">👆</div>
-          <h3 style="font-size: 17px; font-weight: 700; margin-bottom: 8px;">画面上部のカプセルを触ってみてください</h3>
+          <div style="font-size: 42px; margin-bottom: 12px;">🏝️</div>
+          <h3 style="font-size: 17px; font-weight: 700; margin-bottom: 8px;">有機的な「リキッドグラス」の手触り</h3>
           <p style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
-            ただの四角形を広げるのではなく、角丸（border-radius）と寸法を、Apple独自の「オーガニックスプリング（跳ね返り係数）」で同時に遷移させることで、まるで本物の液体シリコンのような触感を作っています。
+            本物のiOSのように、アプリの交代時には中央へキュッと引き締まる「Squish」が発生し、展開時にはバネのオーバシュートで滑らかに開きます。<br>
+            音楽の再生秒数もシークバーのクリック位置にミリ秒単位で追従します。
           </p>
         </div>
 
         <div class="commentary-box">
-          <strong>【部員の解説】リキッドグラスの秘密:</strong><br>
-          単に黒ベタで広げるのではなく、`backdrop-filter: blur(25px)` による背後のすりガラスぼかしと、`inset 0 1px 1px rgba(255,255,255,0.3)` の極薄ハイライトを入れることで、画面から浮き上がった実在感を生み出しています。
+          <strong>【部員の解説】不定期切り替えとUI演出:</strong><br>
+          規則正しい5秒周期ではなく、ランダムな時間間隔でタスクが入れ替わることで、「スマホの裏で誰かが動いている」ようなリアルな生命感が宿ります。
         </div>
       </div>
 
@@ -1074,7 +1154,7 @@
         <div class="panel-heading">
           <div class="panel-tag">Interaction 01</div>
           <h2 class="panel-title">ダイアログの「出現演出」を比較</h2>
-          <p class="panel-desc">同じ「確認ダイアログ」でも、表示される速度・軌道・減速カーブ次第で、安心感・威圧感・ゲーム感が激変します。</p>
+          <p class="panel-desc">同じダイアログでも、速度と減速カーブ次第で安心感や威圧感が劇変します。</p>
         </div>
 
         <div class="preset-list">
@@ -1160,7 +1240,7 @@
         <div class="panel-heading">
           <div class="panel-tag">Interaction 02</div>
           <h2 class="panel-title">ボタンの「触感」を比較</h2>
-          <p class="panel-desc">マウスを重ねた瞬間（hover）と押した瞬間（active）の戻り速度で、物理的な重さの錯覚が生まれます。</p>
+          <p class="panel-desc">マウスを重ねた瞬間と押した瞬間の戻り速度で、物理的な重さの錯覚が生まれます。</p>
         </div>
 
         <div class="preset-list">
@@ -1281,7 +1361,7 @@
         </div>
 
         <div class="commentary-box">
-          スライダーを最大にするとアニメーションがゴムのように激しく跳ね、最小にすると減速せずに固い動きになります。「使いやすさと楽しさのバランス」を探してみてください。
+          スライダーを最大にするとアニメーションがゴムのように激しく跳ね、最小にすると減速せずに固い動きになります。
         </div>
       </div>
 
@@ -1328,33 +1408,22 @@
     }
 
     /* ----------------------------------------------------
-       🌟 ダイナミックアイランドの挙動ロジック
+       🌟 ダイナミックアイランド・リキッド制御エンジン
     ---------------------------------------------------- */
     const island = document.getElementById('dynamicIsland');
     let currentApp = 'music';
     let isExpanded = false;
     let toastTimeout = null;
 
-    // アプリ切り替え
-    function setIslandApp(app, el) {
-      currentApp = app;
-      document.querySelectorAll('#island-section .preset-item').forEach(i => i.classList.remove('active'));
-      if (el) el.classList.add('active');
-
-      // トースト状態なら解除
-      island.classList.remove('state-toast');
-
-      document.querySelectorAll('.island-view').forEach(v => v.classList.remove('active-view'));
-      const activeV = document.getElementById(`view-${app}`);
-      activeV.classList.add('active-view');
-
-      // 展開状態の同期
-      applyExpansionState();
+    // クリック判定（内部のボタン押下時は展開をトグルしない）
+    function handleIslandClick(e) {
+      if (e.target.closest('.music-btn') || e.target.closest('.seek-container') || e.target.closest('button')) {
+        return;
+      }
+      toggleIslandExpansion();
     }
 
-    // 展開・格納の切り替え
     function toggleIslandExpansion() {
-      // トーストが出ている場合は通常状態に戻す
       if (island.classList.contains('state-toast')) {
         island.classList.remove('state-toast');
         isExpanded = false;
@@ -1365,39 +1434,160 @@
       applyExpansionState();
     }
 
+    function setIslandApp(app, el) {
+      currentApp = app;
+      document.querySelectorAll('#island-section .preset-item').forEach(i => i.classList.remove('active'));
+      if (el) {
+        el.classList.add('active');
+      } else {
+        const targetPreset = document.getElementById(`preset-${app}`);
+        if (targetPreset) targetPreset.classList.add('active');
+      }
+
+      island.classList.remove('state-toast');
+
+      // プニッとした有機的縮みトランジションを挟む
+      island.style.transform = 'scale(0.92) scaleY(0.9)';
+      setTimeout(() => {
+        island.style.transform = '';
+      }, 180);
+
+      document.querySelectorAll('.island-view').forEach(v => v.classList.remove('active-view'));
+      const activeV = document.getElementById(`view-${app}`);
+      activeV.classList.add('active-view');
+
+      applyExpansionState();
+    }
+
     function applyExpansionState() {
+      const apps = ['music', 'maps', 'delivery', 'stopwatch'];
       if (isExpanded) {
         island.classList.remove('state-compact');
         island.classList.add('state-expanded');
-        // 各アプリのexpandedビューを表示
-        if(currentApp === 'music') {
-          document.getElementById('music-compact').style.display = 'none';
-          document.getElementById('music-expanded').style.display = 'flex';
-        } else if(currentApp === 'maps') {
-          document.getElementById('maps-compact').style.display = 'none';
-          document.getElementById('maps-expanded').style.display = 'flex';
-        } else if(currentApp === 'delivery') {
-          document.getElementById('uber-compact').style.display = 'none';
-          document.getElementById('uber-expanded').style.display = 'flex';
-        }
+        apps.forEach(a => {
+          const comp = document.getElementById(`${a}-compact`);
+          const exp = document.getElementById(`${a}-expanded`);
+          if (comp) comp.style.display = 'none';
+          if (exp) exp.style.display = (currentApp === a) ? 'flex' : 'none';
+        });
       } else {
         island.classList.remove('state-expanded');
         island.classList.add('state-compact');
-        // 各アプリのcompactビューを表示
-        if(currentApp === 'music') {
-          document.getElementById('music-compact').style.display = 'flex';
-          document.getElementById('music-expanded').style.display = 'none';
-        } else if(currentApp === 'maps') {
-          document.getElementById('maps-compact').style.display = 'flex';
-          document.getElementById('maps-expanded').style.display = 'none';
-        } else if(currentApp === 'delivery') {
-          document.getElementById('uber-compact').style.display = 'flex';
-          document.getElementById('uber-expanded').style.display = 'none';
-        }
+        apps.forEach(a => {
+          const comp = document.getElementById(`${a}-compact`);
+          const exp = document.getElementById(`${a}-expanded`);
+          if (comp) comp.style.display = (currentApp === a) ? 'flex' : 'none';
+          if (exp) exp.style.display = 'none';
+        });
       }
     }
 
-    // ナビ・マップのリアルタイム道案内ループ（3秒ごとに変わる）
+    /* ----------------------------------------------------
+       ⏱️ 不定期（ランダム）自律オート切り替え
+    ---------------------------------------------------- */
+    let autoSwitchEnabled = true;
+    let autoSwitchTimer = null;
+    const appCycle = ['music', 'maps', 'delivery', 'stopwatch'];
+
+    function scheduleNextRandomSwitch() {
+      if (!autoSwitchEnabled) return;
+      // 6秒 〜 14秒のランダムな間隔
+      const randomDelay = Math.floor(Math.random() * (14000 - 6000 + 1)) + 6000;
+      
+      autoSwitchTimer = setTimeout(() => {
+        if (autoSwitchEnabled && !isExpanded && !island.classList.contains('state-toast')) {
+          let nextApp;
+          do {
+            nextApp = appCycle[Math.floor(Math.random() * appCycle.length)];
+          } while (nextApp === currentApp);
+          
+          setIslandApp(nextApp);
+        }
+        scheduleNextRandomSwitch();
+      }, randomDelay);
+    }
+    scheduleNextRandomSwitch();
+
+    function toggleAutoSwitch() {
+      autoSwitchEnabled = !autoSwitchEnabled;
+      const statusText = document.getElementById('autoSwitchStatus');
+      if (autoSwitchEnabled) {
+        statusText.textContent = '稼働中 (6〜14秒)';
+        statusText.style.color = 'var(--accent-shiba)';
+        scheduleNextRandomSwitch();
+      } else {
+        statusText.textContent = '停止中 (手動固定)';
+        statusText.style.color = 'var(--text-muted)';
+        clearTimeout(autoSwitchTimer);
+      }
+    }
+
+    /* ----------------------------------------------------
+       🎵 音楽アプリ：リアル秒数同期 & シークバー
+    ---------------------------------------------------- */
+    let musicPlaying = true;
+    const totalDuration = 220; // 3分40秒
+    let currentSeconds = 84;   // 1分24秒から開始
+    const seekFill = document.getElementById('seekFill');
+    const labelCurrent = document.getElementById('labelCurrentTime');
+    const labelRemain = document.getElementById('labelRemainTime');
+    const compactCurrent = document.getElementById('compactCurrentTime');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const equalizer = document.getElementById('musicEqualizer');
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+
+    function updateMusicUI() {
+      const progressPercent = (currentSeconds / totalDuration) * 100;
+      seekFill.style.width = `${progressPercent}%`;
+      labelCurrent.textContent = formatTime(currentSeconds);
+      compactCurrent.textContent = formatTime(currentSeconds);
+
+      const remainSec = totalDuration - currentSeconds;
+      labelRemain.textContent = `-${formatTime(remainSec)}`;
+    }
+
+    // 1秒ごとのリアルタイム加算
+    setInterval(() => {
+      if (musicPlaying) {
+        currentSeconds++;
+        if (currentSeconds >= totalDuration) currentSeconds = 0;
+        updateMusicUI();
+      }
+    }, 1000);
+
+    // シークバーのクリックで位置移動
+    function seekAudio(e) {
+      e.stopPropagation();
+      const rect = e.currentTarget.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const percent = Math.max(0, Math.min(1, clickX / rect.width));
+      currentSeconds = Math.floor(totalDuration * percent);
+      updateMusicUI();
+    }
+
+    function skipMusic(deltaSec) {
+      currentSeconds = Math.max(0, Math.min(totalDuration, currentSeconds + deltaSec));
+      updateMusicUI();
+    }
+
+    function togglePlayPause(e) {
+      if (e) e.stopPropagation();
+      musicPlaying = !musicPlaying;
+      playPauseBtn.textContent = musicPlaying ? '⏸' : '▶';
+      document.querySelectorAll('.eq-bar').forEach(b => {
+        if (musicPlaying) b.classList.remove('paused');
+        else b.classList.add('paused');
+      });
+    }
+
+    /* ----------------------------------------------------
+       🗺️ ナビ・マップ：自動道案内
+    ---------------------------------------------------- */
     const mapSteps = [
       { arrow: '↗', compact: '200m先 電技研教室を右折', dist: '200m先', road: '高校棟 2F 電子技術研究部', detail: '次の指示: 正面階段を上がって右手の展示室へ' },
       { arrow: '⬆', compact: '120m先 直進（中央廊下）', dist: '120m先', road: '高校棟 中央渡り廊下', detail: '次の指示: そのまままっすぐ理科実験室前を通過' },
@@ -1408,17 +1598,17 @@
     setInterval(() => {
       currentMapIndex = (currentMapIndex + 1) % mapSteps.length;
       const s = mapSteps[currentMapIndex];
-      // コンパクト
       document.getElementById('compactNavIcon').textContent = s.arrow;
       document.getElementById('compactNavText').textContent = s.compact;
-      // 展開
       document.getElementById('expandedNavIcon').textContent = s.arrow;
       document.getElementById('expandedNavDist').textContent = s.dist;
       document.getElementById('expandedNavRoad').textContent = s.road;
       document.getElementById('navStepDetail').textContent = s.detail;
-    }, 3500);
+    }, 4000);
 
-    // 配達状況の自動推移ループ
+    /* ----------------------------------------------------
+       🛵 配達追跡：自動進行
+    ---------------------------------------------------- */
     const deliverySteps = [
       { fill: '25%', eta: 'あと12分', msg: '店主が丹精込めて調理中です' },
       { fill: '65%', eta: 'あと6分', msg: '配達員（田中先輩）が猛スピードで走行中' },
@@ -1432,9 +1622,44 @@
       document.getElementById('deliveryEtaBig').textContent = d.eta;
       document.getElementById('deliveryFill').style.width = d.fill;
       document.getElementById('deliveryStatusMsg').textContent = d.msg;
-    }, 4500);
+    }, 4800);
 
-    // ダイナミックアイランドから滴る通知トースト
+    /* ----------------------------------------------------
+       ⏱️ ストップウォッチ機能（0.1秒単位）
+    ---------------------------------------------------- */
+    let swRunning = true;
+    let swDeciseconds = 0;
+    let swInterval = setInterval(() => {
+      if (swRunning) {
+        swDeciseconds++;
+        renderStopwatch();
+      }
+    }, 100);
+
+    function renderStopwatch() {
+      const minutes = Math.floor(swDeciseconds / 600);
+      const seconds = Math.floor((swDeciseconds % 600) / 10);
+      const d = swDeciseconds % 10;
+      const str = `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}.${d}`;
+      document.getElementById('swCompactDigits').textContent = str;
+      document.getElementById('swBigDigits').textContent = str;
+    }
+
+    function toggleStopwatch(e) {
+      if (e) e.stopPropagation();
+      swRunning = !swRunning;
+      document.getElementById('swToggleBtn').textContent = swRunning ? '停止' : '再開';
+    }
+
+    function resetStopwatch(e) {
+      if (e) e.stopPropagation();
+      swDeciseconds = 0;
+      renderStopwatch();
+    }
+
+    /* ----------------------------------------------------
+       🔔 通知トースト（アイランドから液状分離）
+    ---------------------------------------------------- */
     function triggerIslandNotification(customText) {
       if (toastTimeout) clearTimeout(toastTimeout);
 
@@ -1447,14 +1672,13 @@
 
       island.className = 'dynamic-island state-toast';
 
-      // 3.5秒後に元のアクティビティに有機的に復帰
       toastTimeout = setTimeout(() => {
         setIslandApp(currentApp);
       }, 3500);
     }
 
     /* ----------------------------------------------------
-       モーダル出現演出
+       既存モーダル・ボタン・カスタム調整
     ---------------------------------------------------- */
     let currentModalMode = 'refined';
     const modalOverlay = document.getElementById('modalOverlay');
@@ -1470,23 +1694,23 @@
       },
       instant: {
         tag: 'mode-instant',
-        code: `.modal-overlay, .modal-container {\n  transition: none !important;\n  /* アニメーションなし */\n}`,
-        comment: '<strong>【部員の解説】演出なし:</strong> パッと瞬時に現れるため、どこから現れたのか視線が追いつかず、ユーザーを少し驚かせてしまいます。'
+        code: `.modal-overlay, .modal-container {\n  transition: none !important;\n}`,
+        comment: '<strong>【部員の解説】演出なし:</strong> パッと瞬時に現れるため、どこから現れたのか視線が追いつかず、ユーザーを驚かせてしまいます。'
       },
       bottomsheet: {
         tag: 'mode-bottomsheet',
-        code: `.modal-container {\n  transform: translateY(100%);\n  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);\n  /* 下端から片手操作向けにせり出し */\n}`,
-        comment: '<strong>【部員の解説】ボトムシート:</strong> スマートフォンの親指操作に最適化された演出。下からせり上がることで、直感的に「下へスワイプすれば消せる」感覚を連想させます。'
+        code: `.modal-container {\n  transform: translateY(100%);\n  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);\n}`,
+        comment: '<strong>【部員の解説】ボトムシート:</strong> スマートフォンの親指操作に最適化された演出。下へスワイプすれば消せる感覚を連想させます。'
       },
       shake: {
         tag: 'mode-shake',
-        code: `@keyframes modalShake {\n  20%, 80% { transform: translate3d(4px, 0, 0); }\n  30%, 70% { transform: translate3d(-6px, 0, 0); }\n}\n/* エラー・強い警告を連想 */`,
-        comment: '<strong>【部員の解説】警告シェイク:</strong> 赤い境界線と左右の微振動により、脳に「誤操作や危険」を強く意識させます。重要な警告にしか使ってはいけない演出です。'
+        code: `@keyframes modalShake {\n  20%, 80% { transform: translate3d(4px, 0, 0); }\n  30%, 70% { transform: translate3d(-6px, 0, 0); }\n}`,
+        comment: '<strong>【部員の解説】警告シェイク:</strong> 赤い境界線と左右の微振動により、脳に「誤操作や危険」を強く意識させます。'
       },
       flip: {
         tag: 'mode-flip',
         code: `.modal-overlay { perspective: 1000px; }\n.modal-container {\n  transform: rotateX(-30deg) translateY(-20px);\n  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);\n}`,
-        comment: '<strong>【部員の解説】3Dフリップ:</strong> 奥から手前にパタッと倒れてくる立体演出。ゲームのメニュー画面や特別なイベント告知にぴったりのワクワク感があります。'
+        comment: '<strong>【部員の解説】3Dフリップ:</strong> 奥から手前に倒れてくる立体演出。特別なイベント告知にぴったりのワクワク感があります。'
       }
     };
 
@@ -1505,16 +1729,10 @@
     function closeModal() { modalOverlay.classList.remove('open'); }
     function handleBackdropClick(e) { if (e.target.id === 'modalOverlay') closeModal(); }
 
-    /* ----------------------------------------------------
-       ボタン押し心地
-    ---------------------------------------------------- */
+    // ボタン押し心地
     const interactiveBtn = document.getElementById('interactiveBtn');
-    const btnCodeSnippet = document.getElementById('btnCodeSnippet');
-    const btnPresetTag = document.getElementById('btnPresetTag');
-    const btnCommentary = document.getElementById('btnCommentary');
     const clickCounter = document.getElementById('clickCounter');
     let clickCount = 0;
-
     interactiveBtn.addEventListener('click', () => {
       clickCount++;
       clickCounter.textContent = clickCount;
@@ -1523,82 +1741,44 @@
     });
 
     const btnConfigs = {
-      spring: {
-        tag: 'spring',
-        style: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
-        code: `.test-btn {\n  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);\n}`,
-        comment: '<strong>【部員の解説】バネの跳ね返り:</strong> 押して離した瞬間の「ポヨン」とした反発が、ガラスの画面を物理ボタンのように錯覚させます。'
-      },
-      linear: {
-        tag: 'linear',
-        style: 'all 0.8s linear',
-        code: `.test-btn {\n  transition: all 0.8s linear;\n}`,
-        comment: '<strong>【部員の解説】機械的等速:</strong> スピードが常に一定のため、指の動きと同期せず、重い機械を動かしているような違和感があります。'
-      },
-      sluggish: {
-        tag: 'sluggish',
-        style: 'all 2.0s ease-in-out',
-        code: `.test-btn {\n  transition: all 2.0s ease-in-out;\n}`,
-        comment: '<strong>【部員の解説】遅すぎるアニメーション:</strong> 反応が終わるまで2秒かかるため、「画面が固まったか」と不安を与えてしまいます。'
-      },
-      none: {
-        tag: 'none',
-        style: 'none',
-        code: `.test-btn {\n  transition: none;\n}`,
-        comment: '<strong>【部員の解説】トランジション無し:</strong> パッとした瞬時の切り替わり。レトロ感はありますが、現代では安っぽく感じられます。'
-      }
+      spring: { tag: 'spring', style: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)' },
+      linear: { tag: 'linear', style: 'all 0.8s linear' },
+      sluggish: { tag: 'sluggish', style: 'all 2.0s ease-in-out' },
+      none: { tag: 'none', style: 'none' }
     };
-
     function setBtnPreset(mode, el) {
       interactiveBtn.style.transition = btnConfigs[mode].style;
-      btnPresetTag.textContent = btnConfigs[mode].tag;
-      btnCodeSnippet.textContent = btnConfigs[mode].code;
-      btnCommentary.innerHTML = btnConfigs[mode].comment;
-
+      document.getElementById('btnPresetTag').textContent = btnConfigs[mode].tag;
       document.querySelectorAll('#button-section .preset-item').forEach(item => item.classList.remove('active'));
       el.classList.add('active');
     }
 
-    /* ----------------------------------------------------
-       カスタムスライダー調整
-    ---------------------------------------------------- */
+    // カスタム調整
     function updateCustom() {
       const dur = parseFloat(document.getElementById('sliderDuration').value).toFixed(2);
       const bnc = parseFloat(document.getElementById('sliderBounce').value).toFixed(2);
-
       document.getElementById('valDuration').textContent = `${dur}s`;
       document.getElementById('valBounce').textContent = bnc;
-
       const css = `transition: all ${dur}s cubic-bezier(0.34, ${bnc}, 0.64, 1);`;
       document.getElementById('customCodeSnippet').textContent = css;
-
-      const btn = document.getElementById('customDemoBtn');
-      btn.style.transition = `all ${dur}s cubic-bezier(0.34, ${bnc}, 0.64, 1)`;
+      document.getElementById('customDemoBtn').style.transition = `all ${dur}s cubic-bezier(0.34, ${bnc}, 0.64, 1)`;
     }
-
     function testCustomPop() {
       const btn = document.getElementById('customDemoBtn');
       btn.style.transform = 'scale(1.15) translateY(-6px)';
-      setTimeout(() => {
-        btn.style.transform = 'scale(1) translateY(0)';
-      }, 150);
+      setTimeout(() => { btn.style.transform = 'scale(1) translateY(0)'; }, 150);
     }
     updateCustom();
 
-    /* ----------------------------------------------------
-       交代タイマー
-    ---------------------------------------------------- */
+    // 交代用タイマー
     let timerSeconds = 15 * 60;
     let timerRunning = false;
     let timerInterval = null;
-
     function renderTimer() {
       const m = Math.floor(timerSeconds / 60);
       const s = timerSeconds % 60;
-      document.getElementById('timerDisplay').textContent = 
-        `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      document.getElementById('timerDisplay').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     }
-
     function toggleTimer() {
       const btn = document.getElementById('timerToggle');
       if (timerRunning) {
@@ -1621,7 +1801,6 @@
         }, 1000);
       }
     }
-
     function resetTimer() {
       clearInterval(timerInterval);
       timerRunning = false;
