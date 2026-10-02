@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>CSSで変わる印象ラボ</title>
+<title>CSS Lab</title>
 <style>
 :root{--bg:#E8ECF1;--panel:#fff;--stage:#F6F8FB;--ink:#18212B;--sub:#5d6b7a;--line:#cfd7e1;--accent:#3B5BFF;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F141B;--panel:#1B232E;--stage:#141B24;--ink:#EAF0F7;--sub:#93a1b2;--line:#2c3744;--accent:#6D86FF}}
@@ -77,11 +77,11 @@ dialog a{display:block;font-size:12px;color:var(--accent);word-break:break-all;m
 </style>
 </head>
 <body>
-<header><h1>CSSで変わる印象ラボ</h1><nav id="tabs" role="tablist"></nav><button class="qrb" id="qrb" hidden>📱 スマホで体験</button></header>
+<header><h1>CSSによって変わるサイトの印象</h1><nav id="tabs" role="tablist"></nav><button class="qrb" id="qrb" hidden>スマホで体験</button></header>
 <main>
   <aside id="side"></aside>
   <div class="right">
-    <div class="info"><div><b id="vn"></b><p id="vm"></p></div><div class="acts"><button id="rep">▶ もう一度</button><button id="ph" aria-pressed="false">スマホ幅</button><button id="th">🌓 明暗</button></div></div>
+    <div class="info"><div><b id="vn"></b><p id="vm"></p></div><div class="acts"><button id="rep">▶ もう一度</button><button id="ph" aria-pressed="false">スマホ幅</button><button id="th">テーマ変更</button></div></div>
     <div id="stage"></div>
     <details class="adv" open><summary>高度な設定：CSSを編集</summary>
       <div class="tools">
@@ -100,7 +100,7 @@ dialog a{display:block;font-size:12px;color:var(--accent);word-break:break-all;m
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 const OV='& .ov{opacity:0;transition:opacity .25s,visibility .25s}\n& .ov.open{opacity:1}\n';
-const popupHTML=`<div class="bg"><h4>今日のおすすめ</h4><p>画面の上に何かが現れる瞬間、その出方で「軽い」「丁寧」「楽しい」が決まります。</p><button class="btn" data-open>ポップアップを開く</button></div><div class="ov"><div class="modal"><h3>お知らせ</h3><p>新しい機能が追加されました。</p><button class="btn" data-close>閉じる</button></div></div>`;
+const popupHTML=`<div class="bg"><h4>今日のおすすめ</h4><p>画面の上に何かが現れる瞬間、その出方で決まります。</p><button class="btn" data-open>ポップアップを開く</button></div><div class="ov"><div class="modal"><h3>お知らせ</h3><p>新しい機能が追加されました。</p><button class="btn" data-close>閉じる</button></div></div>`;
 const btnHTML=`<button class="btn">購入手続きへ</button>`;
 const cardHTML=`<div class="cards">${['#3B5BFF','#FF7A59','#22A884'].map((c,i)=>`<div class="card"><i style="background:${c}"></i><h4>${['旅行','料理','運動'][i]}</h4><p>カーソルを重ねるか、タップしてみてください</p></div>`).join('')}</div>`;
 const inHTML=`<label class="f"><input placeholder=" " autocomplete="off"><span>メールアドレス</span></label>`;
