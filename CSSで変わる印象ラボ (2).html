@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CSSで変わる印象ラボ</title>
+<style>
+:root{--bg:#E8ECF1;--panel:#fff;--stage:#F6F8FB;--ink:#18212B;--sub:#5d6b7a;--line:#cfd7e1;--accent:#3B5BFF;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F141B;--panel:#1B232E;--stage:#141B24;--ink:#EAF0F7;--sub:#93a1b2;--line:#2c3744;--accent:#6D86FF}}
+:root[data-theme="dark"]{--bg:#0F141B;--panel:#1B232E;--stage:#141B24;--ink:#EAF0F7;--sub:#93a1b2;--line:#2c3744;--accent:#6D86FF}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"Hiragino Sans","Noto Sans JP","Yu Gothic",system-ui,sans-serif;display:flex;flex-direction:column}
+header{padding:16px 20px 0;display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px}
+h1{font-size:20px;margin:0;letter-spacing:.02em}
+nav{display:flex;gap:6px;flex-wrap:wrap}
+nav button{font:inherit;font-size:14px;font-weight:600;padding:8px 16px;border-radius:999px;border:1.5px solid var(--line);background:transparent;color:var(--sub);cursor:pointer}
+nav button[aria-selected=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+main{flex:1;display:grid;grid-template-columns:230px 1fr;gap:16px;padding:16px 20px 20px;min-height:0}
+aside{display:flex;flex-direction:column;gap:6px;overflow:auto}
+aside button{font:inherit;text-align:left;padding:12px 14px;border-radius:12px;border:1.5px solid transparent;background:var(--panel);color:var(--ink);cursor:pointer;font-weight:600;font-size:14px}
+aside button small{display:block;font-weight:400;color:var(--sub);margin-top:2px;font-size:12px}
+aside button[aria-current=true]{border-color:var(--accent);box-shadow:inset 4px 0 0 var(--accent)}
+.right{display:flex;flex-direction:column;gap:12px;min-height:0;min-width:0}
+.info{background:var(--panel);border-radius:14px;padding:12px 16px}
+.info b{font-size:16px}
+.info p{margin:4px 0 0;color:var(--sub);font-size:14px}
+#stage{position:relative;overflow:hidden;flex:1;min-height:340px;border-radius:14px;background:var(--stage);border:1.5px solid var(--line);display:grid;place-items:center}
+.adv{background:var(--panel);border-radius:14px;padding:10px 16px}
+.adv summary{cursor:pointer;font-weight:700;font-size:14px}
+.adv .hint{margin:8px 0 0;font-size:12px;color:var(--sub)}
+.tools{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:10px 0;font-size:13px;color:var(--sub)}
+.tools label{display:flex;align-items:center;gap:8px}
+.tools button,.tools select{font:inherit;font-size:13px;padding:5px 12px;border-radius:8px;border:1.5px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+textarea{width:100%;height:150px;resize:vertical;background:var(--stage);color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:10px;font:12px/1.6 ui-monospace,Menlo,Consolas,monospace;white-space:pre;tab-size:2}
+.info{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.acts button,.qrb{font:inherit;font-size:13px;font-weight:600;padding:7px 12px;border-radius:10px;border:1.5px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.acts button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff}
+.qrb{margin-left:auto;background:var(--accent);border-color:var(--accent);color:#fff}
+.qrb[hidden],.acts button[hidden]{display:none}
+.right{overflow:auto}
+#stage.phone{flex:0 0 auto;width:375px;max-width:100%;height:580px;align-self:center;border:8px solid var(--ink);border-radius:36px}
+dialog{border:0;border-radius:18px;padding:24px 28px;background:var(--panel);color:var(--ink);text-align:center;max-width:340px}
+dialog::backdrop{background:rgba(10,20,40,.55)}
+dialog h3{margin:0 0 4px}dialog p{margin:0;font-size:13px;color:var(--sub)}
+#qr{display:inline-block;background:#fff;padding:14px;border-radius:12px;margin:14px 0}
+#qr img,#qr canvas{display:block}
+dialog a{display:block;font-size:12px;color:var(--accent);word-break:break-all;margin-bottom:14px}
+.toast{position:absolute;left:50%;bottom:24px;translate:-50% 0;padding:12px 18px;border-radius:12px;background:var(--ink);color:var(--bg);font-size:14px;font-weight:600;opacity:0;pointer-events:none;white-space:nowrap}
+.sw{position:relative;width:84px;height:46px;display:block}
+.sw input{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;cursor:pointer;z-index:1}
+.sw b{position:absolute;inset:0;border-radius:99px;background:#aab4c2}
+.sw b::after{content:"";position:absolute;top:4px;left:4px;width:38px;height:38px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.3)}
+.sw input:checked+b{background:var(--accent)}
+.sw input:checked+b::after{transform:translateX(38px)}
+.err{color:#d33;font-size:12px;min-height:1.2em}
+@media(max-width:720px){main{grid-template-columns:1fr}aside{flex-direction:row;overflow-x:auto}aside button{flex:0 0 auto;min-width:130px}}
+
+/* ---- デモ共通 ---- */
+.bg{position:absolute;inset:0;padding:28px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.bg h4{margin:0;font-size:20px}.bg p{margin:0;color:var(--sub);font-size:14px;max-width:34em}
+.btn{font:inherit;font-weight:700;padding:14px 30px;border:0;border-radius:12px;background:var(--accent);color:#fff;cursor:pointer}
+.ov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,20,40,.45);visibility:hidden}
+.ov.open{visibility:visible}
+.modal{background:var(--panel);width:min(300px,86%);border-radius:16px;padding:22px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.modal h3{margin:0 0 6px}.modal p{margin:0 0 16px;font-size:14px;color:var(--sub)}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:20px;width:100%}
+.card{background:var(--panel);border-radius:14px;padding:16px;border:2px solid transparent;cursor:pointer}
+.card i{display:block;width:34px;height:34px;border-radius:10px;margin-bottom:12px}
+.card h4{margin:0 0 4px;font-size:15px}.card p{margin:0;font-size:12px;opacity:.7}
+.f{display:flex;flex-direction:column-reverse;width:min(300px,80%)}
+.f span{font-size:13px;margin-bottom:6px}
+.f input{width:100%;padding:16px 14px;border:2px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);font:inherit;outline:none}
+.bt{display:flex;gap:16px}
+</style>
+</head>
+<body>
+<header><h1>CSSで変わる印象ラボ</h1><nav id="tabs" role="tablist"></nav><button class="qrb" id="qrb" hidden>📱 スマホで体験</button></header>
+<main>
+  <aside id="side"></aside>
+  <div class="right">
+    <div class="info"><div><b id="vn"></b><p id="vm"></p></div><div class="acts"><button id="rep">▶ もう一度</button><button id="ph" aria-pressed="false">スマホ幅</button><button id="th">🌓 明暗</button></div></div>
+    <div id="stage"></div>
+    <details class="adv" open><summary>高度な設定：CSSを編集</summary>
+      <div class="tools">
+        <label>速さ <input type="range" id="spd" min="0.2" max="3" step="0.1" value="1"><output id="spdo">×1.0</output></label>
+        <label>動きの種類 <select id="ease"><option value="">選んで変更…</option><option>ease</option><option>ease-out</option><option>linear</option><option value="cubic-bezier(.34,1.56,.64,1)">バネ（行き過ぎて戻る）</option><option value="cubic-bezier(.16,1,.3,1)">しなやか減速</option><option value="cubic-bezier(.7,0,.3,1)">ゆっくり→速く→ゆっくり</option></select></label>
+        <button id="rst">元に戻す</button><button id="cp">コピー</button>
+      </div>
+      <textarea id="cssIn" spellcheck="false" aria-label="CSS"></textarea>
+      <div class="err" id="err"></div>
+      <p class="hint">&amp; はデモ領域のこと。.btn / .modal / .card / .f などのクラスを自由に書き換えると、すぐ反映されます。</p>
+    </details>
+  </div>
+</main>
+<dialog id="qrd"><h3>スマホで体験</h3><p>カメラで読み取ってください</p><div id="qr"></div><a id="ql" href="https://2026-shibafusai-webken.vercel.app/" target="_blank" rel="noopener">https://2026-shibafusai-webken.vercel.app/</a><button class="qrb" style="margin:0" onclick="this.closest('dialog').close()">閉じる</button></dialog>
+<style id="dyn"></style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const OV='& .ov{opacity:0;transition:opacity .25s,visibility .25s}\n& .ov.open{opacity:1}\n';
+const popupHTML=`<div class="bg"><h4>今日のおすすめ</h4><p>画面の上に何かが現れる瞬間、その出方で「軽い」「丁寧」「楽しい」が決まります。</p><button class="btn" data-open>ポップアップを開く</button></div><div class="ov"><div class="modal"><h3>お知らせ</h3><p>新しい機能が追加されました。</p><button class="btn" data-close>閉じる</button></div></div>`;
+const btnHTML=`<button class="btn">購入手続きへ</button>`;
+const cardHTML=`<div class="cards">${['#3B5BFF','#FF7A59','#22A884'].map((c,i)=>`<div class="card"><i style="background:${c}"></i><h4>${['旅行','料理','運動'][i]}</h4><p>カーソルを重ねるか、タップしてみてください</p></div>`).join('')}</div>`;
+const inHTML=`<label class="f"><input placeholder=" " autocomplete="off"><span>メールアドレス</span></label>`;
+
+const T=[
+{n:'ポップアップ',html:popupHTML,auto:s=>s.querySelector('.ov').classList.add('open'),v:[
+ {n:'演出なし',s:'0秒で出現',m:'速くて事務的。操作は止まらないが、唐突で無機質な印象。',css:'/* transitionなし */\n& .ov{display:none}\n& .ov.open{display:flex}'},
+ {n:'フェード',s:'ふわっと現れる',m:'穏やかで上品。目に優しいが、少し平凡。',css:OV+'/* opacity 0.25s */'},
+ {n:'ズーム',s:'少し拡大しながら',m:'手前に来た感覚が出て、自然で標準的。',css:OV+'& .modal{transform:scale(.92);transition:transform .25s ease-out}\n& .open .modal{transform:none}'},
+ {n:'バネ減速',s:'行き過ぎて戻る',m:'遊び心があり元気。カジュアルなアプリ向き。',css:OV+'& .modal{transform:scale(.5);transition:transform .5s cubic-bezier(.34,1.56,.64,1)}\n& .open .modal{transform:none}'},
+ {n:'スマホ風ボトムシート',s:'下からスッと',m:'モバイルネイティブな安心感。親指で扱いやすい。',css:OV+'& .ov{align-items:flex-end}\n& .modal{width:100%;border-radius:22px 22px 0 0;transform:translateY(100%);transition:transform .5s cubic-bezier(.32,.72,0,1)}\n& .open .modal{transform:none}'},
+ {n:'右ドロワー',s:'横から滑り込む',m:'作業の流れを保つ。管理画面や設定向き。',css:OV+'& .ov{justify-content:flex-end;align-items:stretch}\n& .modal{width:70%;border-radius:16px 0 0 16px;transform:translateX(100%);transition:transform .4s cubic-bezier(.2,.8,.2,1)}\n& .open .modal{transform:none}'}]},
+{n:'ボタンの感触',html:btnHTML,v:[
+ {n:'フラット',s:'変化なし',m:'静か。押した手応えがなく、反応しているか不安になる。',css:'/* 何も指定しない */'},
+ {n:'浮き上がる',s:'ホバーで上へ',m:'クリックできる感が明確。Webサービスの定番。',css:'& .btn{transition:transform .2s,box-shadow .2s}\n& .btn:hover{transform:translateY(-3px);box-shadow:0 10px 20px rgba(59,91,255,.4)}\n& .btn:active{transform:none;box-shadow:none}'},
+ {n:'押し込み（立体）',s:'物理ボタン風',m:'ゲーム的で触りたくなる。押した実感が強い。',css:'& .btn{box-shadow:0 6px 0 #1f3bb8;transition:transform .08s,box-shadow .08s}\n& .btn:active{transform:translateY(6px);box-shadow:0 0 0 #1f3bb8}'},
+ {n:'光る',s:'グローが広がる',m:'先進的・ガジェット感。夜のUIと相性が良い。',css:'& .btn{transition:box-shadow .3s}\n& .btn:hover{box-shadow:0 0 0 4px rgba(59,91,255,.25),0 8px 30px rgba(59,91,255,.6)}'},
+ {n:'塗りがスライド',s:'色が流れ込む',m:'洗練された印象。ブランドサイト向き。',css:'& .btn{background:linear-gradient(90deg,#18212B 50%,var(--accent) 50%) right/200% 100%;transition:background-position .4s}\n& .btn:hover{background-position:left}'},
+ {n:'ぷにっと',s:'押すと縮んで弾む',m:'親しみやすく柔らかい。子ども向け・日常アプリ。',css:'& .btn{border-radius:999px;transition:transform .4s cubic-bezier(.34,1.56,.64,1)}\n& .btn:hover{transform:scale(1.06)}\n& .btn:active{transform:scale(.9);transition-duration:.1s}'}]},
+{n:'カードのホバー',html:cardHTML,v:[
+ {n:'静止',s:'反応なし',m:'読み物向き。クリックできるか分かりにくい。',css:'/* なし */'},
+ {n:'浮き上がる',s:'影が深くなる',m:'一覧から選ぶ感覚が自然。ECや記事一覧の定番。',css:'& .card{transition:transform .25s,box-shadow .25s}\n& .card:hover{transform:translateY(-6px);box-shadow:0 14px 28px rgba(0,0,0,.2)}'},
+ {n:'枠が光る',s:'輪郭が色づく',m:'端正で控えめ。業務ツールにも合う。',css:'& .card:hover{border-color:var(--accent)}\n& .card{transition:border-color .15s}'},
+ {n:'色が反転',s:'背景が濃くなる',m:'大胆で力強い。今どこにいるかが一目で分かる。',css:'& .card{transition:background .3s,color .3s}\n& .card:hover{background:var(--ink);color:var(--bg)}'},
+ {n:'傾く',s:'3Dで少し回転',m:'遊び心と奥行き。ポートフォリオ向き。',css:'& .cards{perspective:600px}\n& .card{transition:transform .3s}\n& .card:hover{transform:rotateX(8deg) rotateY(-8deg) scale(1.04)}'}]},
+{n:'入力欄',html:inHTML,v:[
+ {n:'枠の色だけ変わる',s:'即時',m:'素朴で軽い。最小限の合図。',css:'& .f input:focus{border-color:var(--accent)}'},
+ {n:'リングが広がる',s:'外側に光の輪',m:'今ここを入力中、がはっきり伝わる。',css:'& .f input{transition:box-shadow .2s,border-color .2s}\n& .f input:focus{border-color:var(--accent);box-shadow:0 0 0 5px rgba(59,91,255,.22)}'},
+ {n:'ラベルが浮く',s:'入力で上へ移動',m:'省スペースでモダン。スマホ画面で重宝する。',css:'& .f{display:block;position:relative}\n& .f span{position:absolute;left:14px;top:17px;margin:0;font-size:15px;color:var(--sub);transition:.2s;transform-origin:left;pointer-events:none}\n& .f input:focus+span,& .f input:not(:placeholder-shown)+span{transform:translateY(-28px) scale(.8);background:var(--stage);padding:0 6px;color:var(--accent)}'}]}
+  ,
+{n:'通知トースト',html:`<div class="bg"><h4>プロフィール編集</h4><p>保存したときの「知らせ方」で、安心感やテンポが変わります。</p><button class="btn" data-toast>保存する</button></div><div class="toast">保存しました</div>`,auto:s=>showToast(s.querySelector('.toast')),v:[
+ {n:'フェード',s:'その場で現れる',m:'邪魔をしない控えめな知らせ。',css:'& .toast{transition:opacity .3s}\n& .toast.open{opacity:1}'},
+ {n:'下からせり上がる',s:'スッと上昇',m:'滑らかで上質。モバイルの標準的な感触。',css:'& .toast{transform:translateY(40px);transition:transform .5s cubic-bezier(.16,1,.3,1),opacity .3s}\n& .toast.open{transform:none;opacity:1}'},
+ {n:'上から降りる',s:'画面上部に着地',m:'システムからの通知らしい、公式な雰囲気。',css:'& .toast{bottom:auto;top:20px;transform:translateY(-50px);transition:transform .45s cubic-bezier(.16,1,.3,1),opacity .3s}\n& .toast.open{transform:none;opacity:1}'},
+ {n:'右からバネ',s:'勢いよく登場',m:'元気で目を引く。見落としたくない通知に。',css:'& .toast{left:auto;right:20px;translate:none;transform:translateX(130%);transition:transform .55s cubic-bezier(.34,1.56,.64,1)}\n& .toast.open{transform:none;opacity:1}'},
+ {n:'ぽんっと弾む',s:'小さく→大きく',m:'ポップで楽しい。ゲームや子ども向け。',css:'& .toast{border-radius:999px;transform:scale(.4);transition:transform .45s cubic-bezier(.34,1.56,.64,1),opacity .2s}\n& .toast.open{transform:none;opacity:1}'}]},
+{n:'スイッチ',html:`<label class="sw"><input type="checkbox" aria-label="通知"><b></b></label>`,v:[
+ {n:'瞬時',s:'切り替わるだけ',m:'機械的。状態は分かるが手応えは薄い。',css:'/* transitionなし */'},
+ {n:'なめらか',s:'0.25秒で移動',m:'自然で安心。迷ったらこれ。',css:'& .sw b,& .sw b::after{transition:.25s}'},
+ {n:'バネ',s:'つまみが弾む',m:'生き物のような手触り。触るのが楽しい。',css:'& .sw b{transition:background .3s}\n& .sw b::after{transition:transform .5s cubic-bezier(.34,1.56,.64,1)}'},
+ {n:'つぶれる（iOS風）',s:'押すとつまみが伸びる',m:'物理的な押し心地。上質なスマホアプリの感触。',css:'& .sw b{transition:background .3s}\n& .sw b::after{transition:transform .3s,width .25s}\n& .sw input:active+b::after{width:50px}\n& .sw input:checked:active+b::after{transform:translateX(26px)}'}]}
+];
+let t=0,v=0,edits={},spd=1;
+const key=()=>t+'-'+v;
+const $=id=>document.getElementById(id);
+function draw(){
+  const topic=T[t],vr=topic.v[v];
+  $('tabs').innerHTML=T.map((x,i)=>`<button role="tab" aria-selected="${i==t}" data-t="${i}">${x.n}</button>`).join('');
+  $('side').innerHTML=topic.v.map((x,i)=>`<button aria-current="${i==v}" data-v="${i}">${x.n}<small>${x.s}</small></button>`).join('');
+  $('vn').textContent=vr.n;$('vm').textContent=vr.m;
+  $('cssIn').value=edits[key()]??vr.css;
+  spd=1;$('spd').value=1;$('spdo').textContent='×1.0';$('ease').value='';
+  inject();
+  $('stage').innerHTML=topic.html;
+  $('rep').hidden=!topic.auto;
+  $('tabs').querySelectorAll('button').forEach((b,i)=>b.title='ショートカット: '+(i+1));
+  if(topic.auto)setTimeout(()=>topic.auto($('stage')),350);
+  try{localStorage.setItem('cil',JSON.stringify([t,v]))}catch{}
+}
+function showToast(el){if(!el)return;el.classList.add('open');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('open'),2200)}
+function inject(){
+  const c=$('cssIn').value;edits[key()]=c;
+  $('dyn').textContent=c.replace(/&/g,'#stage');
+  $('err').textContent=(c.split('{').length!==c.split('}').length)?'波括弧 { } の数が合っていません':'';
+}
+$('cssIn').oninput=inject;
+$('spd').oninput=e=>{
+  const n=+e.target.value,f=n/spd;spd=n;$('spdo').textContent='×'+n.toFixed(1);
+  $('cssIn').value=$('cssIn').value.replace(/(?<![\w#.])(\d*\.?\d+)(ms|s)\b/g,(m,x,u)=>(+(parseFloat(x)*f).toFixed(3))+u);
+  inject();
+};
+$('ease').onchange=e=>{
+  const z=e.target.value;if(!z)return;
+  const tok=/cubic-bezier\([^)]*\)|(?<![\w-])(?:ease-in-out|ease-out|ease-in|ease|linear)(?![\w-])/g;
+  $('cssIn').value=$('cssIn').value.replace(/(transition:)([^;}\n]*)/g,(m,p,b)=>p+b.replace(tok,'').split(/,(?![^(]*\))/).map(x=>x.trim().replace(/\s+/g,' ')+' '+z).join(', '));
+  inject();
+};
+$('rst').onclick=()=>{delete edits[key()];draw()};
+$('cp').onclick=async e=>{try{await navigator.clipboard.writeText($('cssIn').value);e.target.textContent='コピーしました'}catch{e.target.textContent='コピー不可'}setTimeout(()=>e.target.textContent='コピー',1500)};
+$('tabs').onclick=e=>{const b=e.target.closest('[data-t]');if(b){t=+b.dataset.t;v=0;draw()}};
+$('side').onclick=e=>{const b=e.target.closest('[data-v]');if(b){v=+b.dataset.v;draw()}};
+$('stage').onclick=e=>{
+  const ov=$('stage').querySelector('.ov');
+  if(e.target.closest('[data-toast]'))showToast($('stage').querySelector('.toast'));
+  else if(ov&&e.target.closest('[data-open]'))requestAnimationFrame(()=>ov.classList.add('open'));
+  else if(ov&&(e.target.closest('[data-close]')||e.target===ov))ov.classList.remove('open');
+};
+$('rep').onclick=()=>{const tp=T[t];$('stage').innerHTML=tp.html;setTimeout(()=>tp.auto&&tp.auto($('stage')),350)};
+$('ph').onclick=e=>{const on=$('stage').classList.toggle('phone');e.target.setAttribute('aria-pressed',on)};
+$('th').onclick=()=>{const d=document.documentElement,cur=d.dataset.theme||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');d.dataset.theme=cur==='dark'?'light':'dark'};
+document.addEventListener('keydown',e=>{
+  if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||e.metaKey||e.ctrlKey||e.altKey)return;
+  const n=T[t].v.length;
+  if(e.key==='ArrowRight'){v=(v+1)%n;draw();e.preventDefault()}
+  else if(e.key==='ArrowLeft'){v=(v-1+n)%n;draw();e.preventDefault()}
+  else if(/^[1-9]$/.test(e.key)&&T[e.key-1]){t=+e.key-1;v=0;draw()}
+});
+if(matchMedia('(hover:hover) and (pointer:fine)').matches&&innerWidth>=900)$('qrb').hidden=false;
+let qrMade=false;
+$('qrb').onclick=()=>{
+  $('qrd').showModal();
+  if(qrMade)return;qrMade=true;
+  try{new QRCode($('qr'),{text:'https://2026-shibafusai-webken.vercel.app/',width:200,height:200,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M})}
+  catch{$('qr').textContent='QRを作れませんでした。下のリンクを開いてください'}
+};
+try{const sv=JSON.parse(localStorage.getItem('cil'));if(sv&&T[sv[0]]&&T[sv[0]].v[sv[1]]){t=sv[0];v=sv[1]}}catch{}
+draw();
+</script>
+</body>
+</html>
